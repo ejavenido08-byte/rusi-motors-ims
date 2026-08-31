@@ -3,14 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RUSI Motors – Inventory System Login</title>
+  <title>RUSI Motors – Login</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>" />
 </head>
 <body>
 <div class="login-page">
-
-  <!-- LEFT BRAND -->
   <div class="login-brand">
     <div class="login-brand-grid"></div>
     <div class="brand-logo-wrap">
@@ -20,7 +17,7 @@
     </div>
     <div class="brand-tagline">
       <strong>Inventory Management System</strong>
-      Real-time tracking of motorcycles, parts, sales, and suppliers — secured with OTP verification.
+      Secured with OTP verification for Staff and Manager accounts.
     </div>
     <div class="brand-stats">
       <div class="brand-stat"><div class="brand-stat-val">500+</div><div class="brand-stat-lbl">Branches</div></div>
@@ -29,21 +26,18 @@
     </div>
   </div>
 
-  <!-- RIGHT FORM -->
   <div class="login-form-panel">
     <div class="login-box">
 
-      <!-- ═══ STEP 1: Email + Password ═══ -->
+      <!-- STEP 1: Email + Password -->
       <div id="step-login">
         <div class="login-box-header">
           <h2>Welcome back 👋</h2>
-          <p>Sign in — an OTP will be sent to your email</p>
+          <p>Admin signs in directly. Staff &amp; Manager receive an OTP.</p>
         </div>
-
         <div class="login-error" id="login-error">
           ⚠️ <span id="login-error-msg"></span>
         </div>
-
         <form id="login-form" novalidate>
           <div class="form-group">
             <label class="form-label">Email Address</label>
@@ -60,60 +54,38 @@
               <button type="button" class="toggle-password" id="toggle-pw">👁️</button>
             </div>
           </div>
-          <div class="form-options">
-            <label class="form-check"><input type="checkbox" id="remember-me" /> Remember me</label>
-            <a href="#" class="forgot-link">Forgot password?</a>
-          </div>
-          <button type="submit" class="btn-login" id="btn-login">Send OTP &amp; Sign In</button>
+          <button type="submit" class="btn-login" id="btn-login">Sign In</button>
         </form>
-
         <div style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--text-secondary)">
-          New staff or manager?
-          <a href="register.html" style="color:var(--primary);font-weight:600;margin-left:4px">Create Account →</a>
+          New staff or manager? <a href="register.html" style="color:var(--primary);font-weight:600">Create Account →</a>
         </div>
       </div>
 
-      <!-- ═══ STEP 2: OTP Input ═══ -->
+      <!-- STEP 2: OTP (Staff/Manager only) -->
       <div id="step-otp" style="display:none">
         <div class="login-box-header">
           <h2>Check your email 📧</h2>
-          <p id="otp-sent-desc">Enter the 6-digit OTP code sent to your email</p>
+          <p id="otp-sent-desc">Enter the 6-digit code sent to your email</p>
         </div>
-
         <div class="login-error" id="otp-error">
           ⚠️ <span id="otp-error-msg"></span>
         </div>
-
         <div style="text-align:center;margin:1.5rem 0">
           <div style="font-size:3.5rem">📨</div>
           <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:0.5rem">
-            Code expires in <span id="otp-countdown" style="color:var(--primary);font-weight:700">10:00</span>
+            Expires in <span id="otp-countdown" style="color:var(--primary);font-weight:700">10:00</span>
           </p>
         </div>
-
         <div class="form-group">
           <label class="form-label">OTP Code</label>
-          <input
-            class="form-input"
-            type="text"
-            id="otp-input"
-            placeholder="123456"
-            maxlength="6"
-            inputmode="numeric"
-            style="text-align:center;font-size:2rem;font-weight:800;letter-spacing:10px;padding:1rem"
-          />
+          <input class="form-input" type="text" id="otp-input" placeholder="123456" maxlength="6" inputmode="numeric"
+            style="text-align:center;font-size:2rem;font-weight:800;letter-spacing:10px;padding:1rem" />
         </div>
-
         <button class="btn-login" id="btn-verify">✅ Verify &amp; Enter</button>
-
         <div style="text-align:center;margin-top:1rem;font-size:0.85rem">
-          <button id="btn-resend" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.85rem">
-            🔁 Resend OTP
-          </button>
+          <button id="btn-resend" type="button" style="background:none;border:none;color:var(--primary);cursor:pointer">🔁 Resend OTP</button>
           &nbsp;|&nbsp;
-          <button id="btn-back" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:0.85rem">
-            ← Back
-          </button>
+          <button id="btn-back" type="button" style="background:none;border:none;color:var(--text-secondary);cursor:pointer">← Back</button>
         </div>
       </div>
 
@@ -127,13 +99,13 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script type="module">
-  import { loginUser, redirectIfLoggedIn, getBasePath } from './js/auth.js';
-  import { sendOTP, verifyOTP } from './js/otp.js';
-  import { showToast } from './js/app.js';
-  import { auth } from './js/firebase-config.js';
-  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { loginUser, getBasePath } from './js/auth.js';
+  import { sendOTP, verifyOTP }     from './js/otp.js';
+  import { showToast }              from './js/app.js';
+  import { auth }                   from './js/firebase-config.js';
+  import { onAuthStateChanged }     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  // Already logged in? Skip to dashboard
+  // Already logged in → go to dashboard
   onAuthStateChanged(auth, (user) => {
     if (user) window.location.replace(getBasePath() + 'dashboard.html');
   });
@@ -142,12 +114,9 @@
   const loginErrMsg = document.getElementById('login-error-msg');
   const otpError    = document.getElementById('otp-error');
   const otpErrMsg   = document.getElementById('otp-error-msg');
+  let currentEmail = '', currentName = '', countdownTimer;
 
-  let currentEmail = '';
-  let currentName  = '';
-  let countdownTimer;
-
-  // Toggle password — eye icon swap
+  // Eye icon toggle
   document.getElementById('toggle-pw').addEventListener('click', () => {
     const pw  = document.getElementById('password');
     const btn = document.getElementById('toggle-pw');
@@ -155,36 +124,31 @@
     btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
   });
 
-  // Numbers only for OTP input
+  // Numbers only for OTP
   document.getElementById('otp-input').addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
   });
 
-  // ── STEP 1: Login form → verify credentials → send OTP ──
+  // STEP 1: Login
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     loginError.classList.remove('show');
-
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-
     if (!email || !password) {
       loginErrMsg.textContent = 'Please fill in all fields.';
       loginError.classList.add('show'); return;
     }
-
     const btn = document.getElementById('btn-login');
     btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner"></span> Verifying…';
-
+    btn.innerHTML = '<span class="spinner"></span> Signing in…';
     try {
-      // Verify credentials first (Firebase Auth)
       const user = await loginUser(email, password);
       currentEmail = email;
       currentName  = user.displayName || email.split('@')[0];
-
-      // Admin goes straight to dashboard — no OTP needed
       const role = sessionStorage.getItem('rusi_role') || 'Admin';
+
+      // Admin goes straight in — no OTP
       if (role === 'Admin') {
         window.location.replace(getBasePath() + 'dashboard.html');
         return;
@@ -193,11 +157,9 @@
       // Staff and Manager get OTP
       btn.innerHTML = '<span class="spinner"></span> Sending OTP…';
       await sendOTP(email, currentName);
-
       document.getElementById('step-login').style.display = 'none';
       document.getElementById('step-otp').style.display   = 'block';
-      document.getElementById('otp-sent-desc').textContent =
-        `We sent a 6-digit code to ${email}`;
+      document.getElementById('otp-sent-desc').textContent = `Code sent to ${email}`;
       startCountdown(600);
       showToast('OTP sent! Check your Gmail.', 'success');
 
@@ -211,62 +173,54 @@
       loginErrMsg.textContent = msg;
       loginError.classList.add('show');
       btn.disabled  = false;
-      btn.innerHTML = 'Send OTP & Sign In';
+      btn.innerHTML = 'Sign In';
     }
   });
 
-  // ── STEP 2: Verify OTP ───────────────────────────────────
-  document.getElementById('btn-verify').addEventListener('click', async () => {
+  // STEP 2: Verify OTP
+  document.getElementById('btn-verify').addEventListener('click', () => {
     otpError.classList.remove('show');
     const code   = document.getElementById('otp-input').value.trim();
     const result = verifyOTP(code, currentEmail);
-
     if (!result.valid) {
       otpErrMsg.textContent = result.reason;
       otpError.classList.add('show'); return;
     }
-
     clearInterval(countdownTimer);
     window.location.replace(getBasePath() + 'dashboard.html');
   });
 
-  // ── Resend OTP ───────────────────────────────────────────
+  // Resend OTP
   document.getElementById('btn-resend').addEventListener('click', async () => {
     if (!currentEmail) return;
     try {
       await sendOTP(currentEmail, currentName);
       startCountdown(600);
-      showToast('New OTP sent!', 'success');
       document.getElementById('otp-input').value = '';
-    } catch (err) {
-      showToast('Failed to resend: ' + err.message, 'error');
-    }
+      showToast('New OTP sent!', 'success');
+    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
   });
 
-  // ── Back to login ────────────────────────────────────────
+  // Back button
   document.getElementById('btn-back').addEventListener('click', () => {
     clearInterval(countdownTimer);
     document.getElementById('step-otp').style.display   = 'none';
     document.getElementById('step-login').style.display = 'block';
-    document.getElementById('btn-login').disabled  = false;
-    document.getElementById('btn-login').innerHTML = 'Send OTP & Sign In';
+    const btn = document.getElementById('btn-login');
+    btn.disabled  = false;
+    btn.innerHTML = 'Sign In';
   });
 
-  // ── Countdown timer ──────────────────────────────────────
+  // Countdown
   function startCountdown(seconds) {
     clearInterval(countdownTimer);
     let remaining = seconds;
     const el = document.getElementById('otp-countdown');
-
     const tick = () => {
+      if (remaining <= 0) { clearInterval(countdownTimer); if (el) { el.textContent = 'Expired ❌'; el.style.color = 'var(--danger)'; } return; }
       const m = Math.floor(remaining / 60).toString().padStart(2, '0');
       const s = (remaining % 60).toString().padStart(2, '0');
       if (el) el.textContent = `${m}:${s}`;
-      if (remaining <= 0) {
-        clearInterval(countdownTimer);
-        if (el) el.textContent = 'Expired';
-        el.style.color = 'var(--danger)';
-      }
       remaining--;
     };
     tick();
