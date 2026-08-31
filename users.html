@@ -1,304 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Users – RUSI Motors IMS</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👥</text></svg>" />
+  <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-
 <div id="toast-container" class="toast-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
 <aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">🏍️</div>
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-name">RUSI</span>
-      <span class="sidebar-brand-sub">Motors IMS</span>
-    </div>
-  </div>
+  <div class="sidebar-header"><div class="sidebar-logo">🏍️</div><div class="sidebar-brand"><span class="sidebar-brand-name">RUSI</span><span class="sidebar-brand-sub">Motors IMS</span></div></div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
-    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
-    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
-    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html" class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html" class="nav-item"><span class="nav-icon">💰</span> Sales</a>
     <div class="nav-section-label">Management</div>
-    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
-    <a href="users.html"      class="nav-item active"><span class="nav-icon">👥</span> Users</a>
-    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <a href="suppliers.html" class="nav-item" data-min-role="Manager"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html" class="nav-item active" data-role="Admin"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html" class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
     <div class="nav-section-label">Analytics</div>
-    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
-    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+    <a href="reports.html" class="nav-item" data-min-role="Manager"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html" class="nav-item" data-role="Admin"><span class="nav-icon">📋</span> Activity Logs</a>
   </nav>
   <div class="sidebar-user">
     <div class="user-avatar" id="sidebar-user-avatar">AD</div>
-    <div class="user-info">
-      <div class="user-name" id="sidebar-user-name">Admin</div>
-      <div class="user-role" id="sidebar-user-role">Administrator</div>
-    </div>
-    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+    <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading…</div><div class="user-role" id="sidebar-user-role">—</div></div>
+    <button class="btn-logout" id="btn-logout">🚪</button>
   </div>
 </aside>
-
 <div class="main-content">
   <header class="top-header">
     <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-    <div class="header-title">
-      <h1>User Management</h1>
-      <p>Feature 5 — Manage system users and access roles</p>
-    </div>
-    <div class="header-actions">
-      <div class="header-time" id="live-clock"></div>
-    </div>
+    <div class="header-title"><h1>User Management</h1><p>Feature 5 — Admin only</p></div>
+    <div class="header-actions"><div class="header-time" id="live-clock"></div></div>
   </header>
-
   <div class="page-body">
 
-    <div class="alert alert-info mb-2">
-      ℹ️ <strong>Note:</strong> Creating new Firebase Auth users requires the Firebase Admin SDK (server-side). This page manages user profile records stored in Firestore. Use the Firebase Console to create/delete Auth accounts.
+    <!-- Non-Admin blocked -->
+    <div id="blocked" style="display:none;text-align:center;padding:5rem 1rem">
+      <div style="font-size:3rem">🔒</div>
+      <h2 style="color:var(--text-primary);margin:1rem 0 0.5rem">Admin Only</h2>
+      <p style="color:var(--text-secondary)">User management is restricted to Administrators.</p>
+      <a href="dashboard.html" class="btn btn-primary" style="margin-top:1.5rem;display:inline-flex">← Dashboard</a>
     </div>
 
-    <div class="stats-grid mb-3">
-      <div class="stat-card" style="--stat-color:#3498db">
-        <div class="stat-icon-wrap">👥</div>
-        <div class="stat-info"><div class="stat-val" id="u-total">—</div><div class="stat-label">Total Users</div></div>
+    <div id="page-content">
+      <div class="alert alert-info mb-2">ℹ️ <strong>Note:</strong> User profiles are stored in Firestore. Firebase Auth accounts are created via the Register page or Firebase Console.</div>
+      <div class="stats-grid mb-3">
+        <div class="stat-card" style="--stat-color:#3498db"><div class="stat-icon-wrap">👥</div><div class="stat-info"><div class="stat-val" id="u-total">—</div><div class="stat-label">Total Users</div></div></div>
+        <div class="stat-card" style="--stat-color:#e63946"><div class="stat-icon-wrap">👑</div><div class="stat-info"><div class="stat-val" id="u-admins">—</div><div class="stat-label">Admins</div></div></div>
+        <div class="stat-card" style="--stat-color:#f39c12"><div class="stat-icon-wrap">🧑‍💼</div><div class="stat-info"><div class="stat-val" id="u-managers">—</div><div class="stat-label">Managers</div></div></div>
+        <div class="stat-card" style="--stat-color:#2ecc71"><div class="stat-icon-wrap">👤</div><div class="stat-info"><div class="stat-val" id="u-staff">—</div><div class="stat-label">Staff</div></div></div>
       </div>
-      <div class="stat-card" style="--stat-color:#e63946">
-        <div class="stat-icon-wrap">👑</div>
-        <div class="stat-info"><div class="stat-val" id="u-admins">—</div><div class="stat-label">Admins</div></div>
-      </div>
-      <div class="stat-card" style="--stat-color:#2ecc71">
-        <div class="stat-icon-wrap">🧑‍💼</div>
-        <div class="stat-info"><div class="stat-val" id="u-staff">—</div><div class="stat-label">Staff</div></div>
-      </div>
-      <div class="stat-card" style="--stat-color:#f39c12">
-        <div class="stat-icon-wrap">🔒</div>
-        <div class="stat-info"><div class="stat-val" id="u-inactive">—</div><div class="stat-label">Inactive</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="card-title-icon">👥</span> User Accounts</span>
-        <div class="flex gap-1 flex-wrap">
-          <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="u-search" placeholder="Search users…" />
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">👥</span> All Users</span>
+          <div class="flex gap-1 flex-wrap">
+            <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="u-search" placeholder="Search users…"/></div>
+            <select class="select-field" id="u-role-filter" style="width:auto"><option value="">All Roles</option><option>Admin</option><option>Manager</option><option>Staff</option></select>
           </div>
-          <select class="select-field" id="u-role-filter" style="width:auto">
-            <option value="">All Roles</option>
-            <option>Admin</option>
-            <option>Manager</option>
-            <option>Staff</option>
-          </select>
-          <button class="btn btn-primary btn-sm" id="btn-add-user">+ Add User Profile</button>
         </div>
+        <div class="table-wrap">
+          <table class="data-table" id="u-table">
+            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Branch</th><th>Status</th><th>Registered</th><th>Actions</th></tr></thead>
+            <tbody id="u-tbody"><tr><td colspan="8" style="text-align:center;padding:2rem" class="text-muted">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <div id="u-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
       </div>
-      <div class="table-wrap">
-        <table class="data-table" id="u-table">
-          <thead>
-            <tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Branch</th><th>Phone</th><th>Status</th><th>Created</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="u-tbody">
-            <tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">Loading users…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div id="u-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
     </div>
-
   </div>
 </div>
 
 <!-- MODAL -->
 <div class="modal-overlay" id="u-modal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="u-modal-title">Add User Profile</h3>
-      <button class="modal-close" id="u-modal-close">✕</button>
-    </div>
+    <div class="modal-header"><h3 id="u-modal-title">Edit User</h3><button class="modal-close" id="u-modal-close">✕</button></div>
     <div class="modal-body">
-      <input type="hidden" id="u-edit-id" />
+      <input type="hidden" id="u-edit-id"/>
       <div class="form-grid">
-        <div class="input-group">
-          <label class="input-label">Full Name *</label>
-          <input class="input-field" id="u-name" placeholder="First and last name" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Email *</label>
-          <input class="input-field" type="email" id="u-email" placeholder="user@rusimotors.com" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Role *</label>
-          <select class="select-field" id="u-role">
-            <option>Admin</option>
-            <option>Manager</option>
-            <option>Staff</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label class="input-label">Branch</label>
-          <input class="input-field" id="u-branch" placeholder="e.g. Manila Main Branch" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Phone Number</label>
-          <input class="input-field" id="u-phone" placeholder="09XXXXXXXXX" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Status</label>
-          <select class="select-field" id="u-status">
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-        </div>
+        <div class="input-group"><label class="input-label">Full Name</label><input class="input-field" id="u-name"/></div>
+        <div class="input-group"><label class="input-label">Email</label><input class="input-field" type="email" id="u-email" disabled style="opacity:0.5"/></div>
+        <div class="input-group"><label class="input-label">Role</label><select class="select-field" id="u-role"><option>Admin</option><option>Manager</option><option>Staff</option></select></div>
+        <div class="input-group"><label class="input-label">Branch</label><input class="input-field" id="u-branch" placeholder="e.g. Manila Main"/></div>
+        <div class="input-group"><label class="input-label">Phone</label><input class="input-field" id="u-phone" placeholder="09XXXXXXXXX"/></div>
+        <div class="input-group"><label class="input-label">Status</label><select class="select-field" id="u-status"><option>Active</option><option>Inactive</option></select></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" id="u-modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="u-modal-save">💾 Save User</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" id="u-modal-cancel">Cancel</button><button class="btn btn-primary" id="u-modal-save">💾 Save Changes</button></div>
   </div>
 </div>
 
 <script type="module">
-  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
-  import { startClock, showToast, initSidebarToggle, Paginator, formatDate } from './js/app.js';
+  import { requireAuth, logoutUser, populateSidebarUser, getCachedRole } from './js/auth.js';
+  import { startClock, showToast, initSidebarToggle, Paginator } from './js/app.js';
   import { logActivity } from './js/logs.js';
   import { db } from './js/firebase-config.js';
-  import {
-    collection, getDocs, addDoc, updateDoc, deleteDoc,
-    doc, orderBy, query, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { collection, getDocs, updateDoc, deleteDoc, doc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   requireAuth(); populateSidebarUser(); startClock(); initSidebarToggle();
   document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
 
-  let allUsers = [], paginator;
+  let allUsers=[], paginator;
+
+  setTimeout(async () => {
+    const role = getCachedRole();
+    if (role !== 'Admin') {
+      document.getElementById('blocked').style.display      = 'block';
+      document.getElementById('page-content').style.display = 'none';
+      return;
+    }
+    loadUsers();
+  }, 800);
 
   async function loadUsers() {
-    const snap = await getDocs(query(collection(db, 'users'), orderBy('name')));
-    allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(query(collection(db,'users'), orderBy('name')));
+    allUsers = snap.docs.map(d=>({id:d.id,...d.data()}));
     applyFilters();
     document.getElementById('u-total').textContent    = allUsers.length;
-    document.getElementById('u-admins').textContent   = allUsers.filter(u => u.role === 'Admin').length;
-    document.getElementById('u-staff').textContent    = allUsers.filter(u => u.role === 'Staff').length;
-    document.getElementById('u-inactive').textContent = allUsers.filter(u => u.status !== 'Active').length;
+    document.getElementById('u-admins').textContent   = allUsers.filter(u=>u.role==='Admin').length;
+    document.getElementById('u-managers').textContent = allUsers.filter(u=>u.role==='Manager').length;
+    document.getElementById('u-staff').textContent    = allUsers.filter(u=>u.role==='Staff').length;
   }
 
   function applyFilters() {
     const search = document.getElementById('u-search').value.toLowerCase();
     const role   = document.getElementById('u-role-filter').value;
-    let filtered = allUsers.filter(u => {
-      const ms = !search || (u.name||'').toLowerCase().includes(search) || (u.email||'').toLowerCase().includes(search);
-      const mr = !role   || u.role === role;
-      return ms && mr;
-    });
-    paginator = new Paginator(filtered, 15);
-    renderPage(1);
+    const filtered = allUsers.filter(u=>(!search||(u.name||'').toLowerCase().includes(search)||(u.email||'').toLowerCase().includes(search))&&(!role||u.role===role));
+    paginator = new Paginator(filtered, 15); renderPage(1);
   }
 
   function renderPage(n) {
     const items = paginator.getPage(n);
-    const tbody = document.getElementById('u-tbody');
-    const roleColors = { Admin: 'badge-danger', Manager: 'badge-warning', Staff: 'badge-info' };
-
-    if (!items.length) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">No users found</td></tr>';
-    } else {
-      tbody.innerHTML = items.map((u, i) => {
-        const created = u.createdAt?.toDate ? u.createdAt.toDate().toLocaleDateString('en-PH') : '—';
-        return `<tr>
-          <td class="text-muted">${(paginator.current-1)*15+i+1}</td>
-          <td class="fw-600">${u.name||'—'}</td>
-          <td class="text-secondary">${u.email||'—'}</td>
-          <td><span class="badge ${roleColors[u.role]||'badge-muted'}">${u.role||'Staff'}</span></td>
-          <td class="text-secondary">${u.branch||'—'}</td>
-          <td class="text-secondary">${u.phone||'—'}</td>
-          <td><span class="badge ${u.status==='Active'?'badge-success':'badge-warning'}">${u.status||'Active'}</span></td>
-          <td class="text-muted">${created}</td>
-          <td>
-            <button class="btn btn-secondary btn-sm" onclick="editUser('${u.id}')">✏️</button>
-            <button class="btn btn-danger btn-sm"    onclick="deleteUser('${u.id}','${(u.name||'').replace(/'/g,"\\'")}')">🗑️</button>
-          </td>
-        </tr>`;
-      }).join('');
-    }
+    const roleColors = {Admin:'badge-danger',Manager:'badge-warning',Staff:'badge-info'};
+    document.getElementById('u-tbody').innerHTML = items.length ? items.map((u,i)=>{
+      const created = u.createdAt?.toDate?u.createdAt.toDate().toLocaleDateString('en-PH'):'—';
+      return `<tr>
+        <td class="text-muted">${(paginator.current-1)*15+i+1}</td>
+        <td class="fw-600">${u.name||'—'}</td>
+        <td class="text-secondary">${u.email||'—'}</td>
+        <td><span class="badge ${roleColors[u.role]||'badge-muted'}">${u.role||'Staff'}</span></td>
+        <td class="text-secondary">${u.branch||'—'}</td>
+        <td><span class="badge ${u.status==='Active'?'badge-success':'badge-warning'}">${u.status||'Active'}</span></td>
+        <td class="text-muted">${created}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="editUser('${u.id}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="delUser('${u.id}','${(u.name||'').replace(/'/g,"\\'")}')">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="8" style="text-align:center;padding:2rem" class="text-muted">No users found</td></tr>';
     paginator.renderControls('u-pagination', renderPage);
   }
 
-  const modal = document.getElementById('u-modal');
-  const openModal  = () => modal.classList.add('show');
-  const closeModal = () => { modal.classList.remove('show'); resetForm(); };
-  const resetForm  = () => {
-    ['u-edit-id','u-name','u-email','u-branch','u-phone'].forEach(id => {
-      const el = document.getElementById(id); if (el) el.value = '';
-    });
-    document.getElementById('u-role').value   = 'Staff';
-    document.getElementById('u-status').value = 'Active';
-    document.getElementById('u-modal-title').textContent = 'Add User Profile';
-  };
+  const modal=document.getElementById('u-modal');
+  const openM=()=>modal.classList.add('show');
+  const closeM=()=>{modal.classList.remove('show');};
+  document.getElementById('u-modal-close').addEventListener('click', closeM);
+  document.getElementById('u-modal-cancel').addEventListener('click', closeM);
+  modal.addEventListener('click', e=>{if(e.target===modal)closeM();});
 
-  document.getElementById('btn-add-user').addEventListener('click', openModal);
-  document.getElementById('u-modal-close').addEventListener('click', closeModal);
-  document.getElementById('u-modal-cancel').addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-
-  document.getElementById('u-modal-save').addEventListener('click', async () => {
-    const name  = document.getElementById('u-name').value.trim();
-    const email = document.getElementById('u-email').value.trim();
-    if (!name || !email) { showToast('Name and email are required.', 'warning'); return; }
-    const editId = document.getElementById('u-edit-id').value;
-    const data = {
-      name, email,
-      role:   document.getElementById('u-role').value,
-      branch: document.getElementById('u-branch').value.trim(),
-      phone:  document.getElementById('u-phone').value.trim(),
-      status: document.getElementById('u-status').value,
-      updatedAt: serverTimestamp()
-    };
-    try {
-      if (editId) {
-        await updateDoc(doc(db, 'users', editId), data);
-        await logActivity('USERS', `Updated user: ${name}`);
-        showToast('User updated.', 'success');
-      } else {
-        data.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'users'), data);
-        await logActivity('USERS', `Added user profile: ${name} (${email})`);
-        showToast('User added.', 'success');
-      }
-      closeModal(); loadUsers();
-    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  document.getElementById('u-modal-save').addEventListener('click', async()=>{
+    const editId=document.getElementById('u-edit-id').value;
+    if(!editId)return;
+    const data={name:document.getElementById('u-name').value.trim(),role:document.getElementById('u-role').value,branch:document.getElementById('u-branch').value.trim(),phone:document.getElementById('u-phone').value.trim(),status:document.getElementById('u-status').value,updatedAt:serverTimestamp()};
+    try{await updateDoc(doc(db,'users',editId),data);await logActivity('USERS',`Updated user: ${data.name}`);showToast('User updated.','success');closeM();loadUsers();}
+    catch(err){showToast('Error: '+err.message,'error');}
   });
 
-  window.editUser = function(id) {
-    const u = allUsers.find(x => x.id === id); if (!u) return;
-    document.getElementById('u-edit-id').value  = id;
-    document.getElementById('u-name').value     = u.name   || '';
-    document.getElementById('u-email').value    = u.email  || '';
-    document.getElementById('u-role').value     = u.role   || 'Staff';
-    document.getElementById('u-branch').value   = u.branch || '';
-    document.getElementById('u-phone').value    = u.phone  || '';
-    document.getElementById('u-status').value   = u.status || 'Active';
-    document.getElementById('u-modal-title').textContent = 'Edit User';
-    openModal();
+  window.editUser=function(id){
+    const u=allUsers.find(x=>x.id===id); if(!u)return;
+    document.getElementById('u-edit-id').value = id;
+    document.getElementById('u-name').value    = u.name||'';
+    document.getElementById('u-email').value   = u.email||'';
+    document.getElementById('u-role').value    = u.role||'Staff';
+    document.getElementById('u-branch').value  = u.branch||'';
+    document.getElementById('u-phone').value   = u.phone||'';
+    document.getElementById('u-status').value  = u.status||'Active';
+    document.getElementById('u-modal-title').textContent = 'Edit User — '+u.name;
+    openM();
   };
 
-  window.deleteUser = async function(id, name) {
-    if (!confirm(`Remove user profile for "${name}"?`)) return;
-    try {
-      await deleteDoc(doc(db, 'users', id));
-      await logActivity('USERS', `Deleted user profile: ${name}`);
-      showToast('User removed.', 'success'); loadUsers();
-    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  window.delUser=async function(id,name){
+    if(!confirm(`Remove profile for "${name}"? (Firebase Auth account is not deleted)`))return;
+    try{await deleteDoc(doc(db,'users',id));await logActivity('USERS',`Deleted profile: ${name}`);showToast('Removed.','success');loadUsers();}
+    catch(err){showToast('Error: '+err.message,'error');}
   };
 
   document.getElementById('u-search').addEventListener('input', applyFilters);
   document.getElementById('u-role-filter').addEventListener('change', applyFilters);
-  loadUsers();
 </script>
 </body>
 </html>
