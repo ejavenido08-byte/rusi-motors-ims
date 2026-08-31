@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Low Stock Alerts – RUSI Motors IMS</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚠️</text></svg>" />
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🏍️</div>
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">RUSI</span>
+      <span class="sidebar-brand-sub">Motors IMS</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <div class="nav-section-label">Management</div>
+    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"   class="nav-item active"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <div class="nav-section-label">Analytics</div>
+    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-user-name">Admin</div>
+      <div class="user-role" id="sidebar-user-role">Administrator</div>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="top-header">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="header-title">
+      <h1>Low Stock Alerts</h1>
+      <p>Feature 7 — Monitor and restock items below minimum levels</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-time" id="live-clock"></div>
+      <button class="btn btn-secondary btn-sm" id="btn-refresh">🔄 Refresh</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportTableCSV('ls-table','low-stock.csv')">⬇️ Export</button>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- Alert banner -->
+    <div class="alert alert-warning mb-2" id="ls-alert" style="display:none">
+      ⚠️ <strong>Attention:</strong> <span id="ls-alert-msg"></span> — Please restock immediately to avoid stockouts.
+    </div>
+
+    <div class="stats-grid mb-3">
+      <div class="stat-card" style="--stat-color:#e74c3c">
+        <div class="stat-icon-wrap">❌</div>
+        <div class="stat-info"><div class="stat-val" id="ls-outstock">—</div><div class="stat-label">Out of Stock</div></div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f39c12">
+        <div class="stat-icon-wrap">⚠️</div>
+        <div class="stat-info"><div class="stat-val" id="ls-critical">—</div><div class="stat-label">Critical (≤3)</div></div>
+      </div>
+      <div class="stat-card" style="--stat-color:#e67e22">
+        <div class="stat-icon-wrap">📉</div>
+        <div class="stat-info"><div class="stat-val" id="ls-low">—</div><div class="stat-label">Low Stock</div></div>
+      </div>
+      <div class="stat-card" style="--stat-color:#3498db">
+        <div class="stat-icon-wrap">💰</div>
+        <div class="stat-info"><div class="stat-val" id="ls-restock-val">—</div><div class="stat-label">Est. Restock Cost</div></div>
+      </div>
+    </div>
+
+    <!-- Critical items card -->
+    <div class="card mb-3" id="critical-card">
+      <div class="card-header">
+        <span class="card-title"><span class="card-title-icon">🚨</span> Out of Stock &amp; Critical</span>
+        <span class="badge badge-danger" id="critical-count">0 items</span>
+      </div>
+      <div id="critical-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;padding-bottom:0.5rem">
+        <div class="text-muted" style="text-align:center;padding:2rem;grid-column:1/-1">Loading…</div>
+      </div>
+    </div>
+
+    <!-- Full table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="card-title-icon">📋</span> All Low Stock Items</span>
+        <div class="flex gap-1 flex-wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="ls-search" placeholder="Search items…" />
+          </div>
+          <select class="select-field" id="ls-cat-filter" style="width:auto">
+            <option value="">All Categories</option>
+            <option>Motorcycles</option>
+            <option>Spare Parts</option>
+            <option>Accessories</option>
+            <option>E-Bikes</option>
+          </select>
+          <select class="select-field" id="ls-level-filter" style="width:auto">
+            <option value="">All Levels</option>
+            <option value="out">Out of Stock</option>
+            <option value="critical">Critical (≤3)</option>
+            <option value="low">Low Stock</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="ls-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Item Name</th><th>Category</th><th>SKU</th>
+              <th>Current Stock</th><th>Min Level</th><th>Shortage</th>
+              <th>Unit Price</th><th>Est. Restock Cost</th><th>Supplier</th><th>Alert Level</th>
+            </tr>
+          </thead>
+          <tbody id="ls-tbody">
+            <tr><td colspan="11" style="text-align:center;padding:2rem" class="text-muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="ls-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { startClock, showToast, initSidebarToggle, exportTableCSV, formatPeso, Paginator } from './js/app.js';
+  import { logActivity } from './js/logs.js';
+  import { db } from './js/firebase-config.js';
+  import {
+    collection, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  requireAuth(); populateSidebarUser(); startClock(); initSidebarToggle();
+  document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
+  window.exportTableCSV = exportTableCSV;
+
+  let lowItems = [], paginator;
+
+  async function loadLowStock() {
+    try {
+      const snap = await getDocs(query(collection(db, 'inventory'), orderBy('quantity')));
+      const all  = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      lowItems = all.filter(i => Number(i.quantity) <= Number(i.minStock || 5));
+
+      const outStock = lowItems.filter(i => Number(i.quantity) === 0);
+      const critical = lowItems.filter(i => Number(i.quantity) > 0 && Number(i.quantity) <= 3);
+      const low      = lowItems.filter(i => Number(i.quantity) > 3);
+
+      let restockCost = 0;
+      lowItems.forEach(i => {
+        const shortage = Math.max(0, Number(i.minStock || 5) - Number(i.quantity));
+        restockCost += shortage * Number(i.price || 0);
+      });
+
+      document.getElementById('ls-outstock').textContent    = outStock.length;
+      document.getElementById('ls-critical').textContent    = critical.length;
+      document.getElementById('ls-low').textContent         = low.length;
+      document.getElementById('ls-restock-val').textContent = formatPeso(restockCost);
+
+      // Alert banner
+      const totalAlert = outStock.length + critical.length;
+      if (totalAlert > 0) {
+        document.getElementById('ls-alert').style.display = 'flex';
+        document.getElementById('ls-alert-msg').textContent =
+          `${totalAlert} item${totalAlert > 1 ? 's' : ''} need urgent restocking`;
+      }
+
+      // Critical grid cards
+      const criticalItems = [...outStock, ...critical];
+      document.getElementById('critical-count').textContent = criticalItems.length + ' items';
+      const grid = document.getElementById('critical-grid');
+      if (!criticalItems.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:2rem;grid-column:1/-1" class="text-success">✅ No critical items right now</div>';
+      } else {
+        grid.innerHTML = criticalItems.map(i => {
+          const isOut  = Number(i.quantity) === 0;
+          const color  = isOut ? 'var(--danger)' : 'var(--warning)';
+          const label  = isOut ? 'OUT OF STOCK' : 'CRITICAL';
+          const shortage = Math.max(0, Number(i.minStock||5) - Number(i.quantity));
+          return `
+            <div style="background:var(--bg-surface);border:1px solid ${color}33;border-left:3px solid ${color};border-radius:var(--radius-md);padding:1rem">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem">
+                <span style="font-weight:700;font-size:0.9rem;color:var(--text-primary)">${i.name||'—'}</span>
+                <span class="badge ${isOut?'badge-danger':'badge-warning'}">${label}</span>
+              </div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem">${i.category||'—'} ${i.sku ? '• '+i.sku : ''}</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;font-size:0.82rem">
+                <div><span class="text-muted">Stock:</span> <strong style="color:${color}">${i.quantity}</strong></div>
+                <div><span class="text-muted">Min:</span> <strong>${i.minStock||5}</strong></div>
+                <div><span class="text-muted">Need:</span> <strong class="text-danger">${shortage}</strong></div>
+                <div><span class="text-muted">Cost:</span> <strong class="text-success">${formatPeso(shortage * Number(i.price||0))}</strong></div>
+              </div>
+              ${i.supplier ? `<div style="margin-top:0.5rem;font-size:0.75rem;color:var(--text-muted)">🏭 ${i.supplier}</div>` : ''}
+            </div>`;
+        }).join('');
+      }
+
+      await logActivity('SYSTEM', `Low stock page viewed — ${lowItems.length} items flagged`);
+      applyFilters();
+
+    } catch (err) {
+      showToast('Error loading data: ' + err.message, 'error');
+    }
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('ls-search').value.toLowerCase();
+    const cat    = document.getElementById('ls-cat-filter').value;
+    const level  = document.getElementById('ls-level-filter').value;
+
+    let filtered = lowItems.filter(i => {
+      const qty = Number(i.quantity);
+      const ms  = !search || (i.name||'').toLowerCase().includes(search) || (i.sku||'').toLowerCase().includes(search);
+      const mc  = !cat   || i.category === cat;
+      const ml  = !level ||
+        (level === 'out'      && qty === 0) ||
+        (level === 'critical' && qty > 0 && qty <= 3) ||
+        (level === 'low'      && qty > 3);
+      return ms && mc && ml;
+    });
+
+    paginator = new Paginator(filtered, 20);
+    renderPage(1);
+  }
+
+  function renderPage(n) {
+    const items = paginator.getPage(n);
+    const tbody = document.getElementById('ls-tbody');
+
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:2rem" class="text-success fw-600">✅ All items are within safe stock levels!</td></tr>';
+    } else {
+      tbody.innerHTML = items.map((i, idx) => {
+        const qty      = Number(i.quantity);
+        const minStk   = Number(i.minStock || 5);
+        const shortage = Math.max(0, minStk - qty);
+        const cost     = shortage * Number(i.price || 0);
+        const isOut    = qty === 0;
+        const isCrit   = qty > 0 && qty <= 3;
+        const level    = isOut ? 'Out of Stock' : isCrit ? 'Critical' : 'Low Stock';
+        const bc       = isOut ? 'badge-danger' : isCrit ? 'badge-warning' : 'badge-warning';
+
+        return `<tr>
+          <td class="text-muted">${(paginator.current-1)*20+idx+1}</td>
+          <td class="fw-600">${i.name||'—'}</td>
+          <td><span class="badge badge-muted">${i.category||'—'}</span></td>
+          <td class="text-secondary">${i.sku||'—'}</td>
+          <td class="fw-700 ${isOut?'text-danger':isCrit?'text-warning':'text-warning'}">${qty}</td>
+          <td class="text-muted">${minStk}</td>
+          <td class="fw-700 text-danger">-${shortage}</td>
+          <td>${formatPeso(i.price)}</td>
+          <td class="fw-600 text-info">${formatPeso(cost)}</td>
+          <td class="text-secondary">${i.supplier||'—'}</td>
+          <td><span class="badge ${bc}">${level}</span></td>
+        </tr>`;
+      }).join('');
+    }
+    paginator.renderControls('ls-pagination', renderPage);
+  }
+
+  document.getElementById('ls-search').addEventListener('input', applyFilters);
+  document.getElementById('ls-cat-filter').addEventListener('change', applyFilters);
+  document.getElementById('ls-level-filter').addEventListener('change', applyFilters);
+  document.getElementById('btn-refresh').addEventListener('click', loadLowStock);
+
+  loadLowStock();
+</script>
+</body>
+</html>

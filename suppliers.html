@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Suppliers – RUSI Motors IMS</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏭</text></svg>" />
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🏍️</div>
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">RUSI</span>
+      <span class="sidebar-brand-sub">Motors IMS</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <div class="nav-section-label">Management</div>
+    <a href="suppliers.html"  class="nav-item active"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <div class="nav-section-label">Analytics</div>
+    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-user-name">Admin</div>
+      <div class="user-role" id="sidebar-user-role">Administrator</div>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="top-header">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="header-title">
+      <h1>Supplier Management</h1>
+      <p>Feature 3 — Manage motorcycle and parts suppliers</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-time" id="live-clock"></div>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <div class="stats-grid mb-3">
+      <div class="stat-card" style="--stat-color:#3498db">
+        <div class="stat-icon-wrap">🏭</div>
+        <div class="stat-info">
+          <div class="stat-val" id="sup-total">—</div>
+          <div class="stat-label">Total Suppliers</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#2ecc71">
+        <div class="stat-icon-wrap">✅</div>
+        <div class="stat-info">
+          <div class="stat-val" id="sup-active">—</div>
+          <div class="stat-label">Active</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f39c12">
+        <div class="stat-icon-wrap">⏸️</div>
+        <div class="stat-info">
+          <div class="stat-val" id="sup-inactive">—</div>
+          <div class="stat-label">Inactive</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#e63946">
+        <div class="stat-icon-wrap">🗂️</div>
+        <div class="stat-info">
+          <div class="stat-val" id="sup-categories">—</div>
+          <div class="stat-label">Categories</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="card-title-icon">🏭</span> Supplier Directory</span>
+        <div class="flex gap-1 flex-wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="sup-search" placeholder="Search suppliers…" />
+          </div>
+          <select class="select-field" id="sup-status-filter" style="width:auto">
+            <option value="">All Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+          <button class="btn btn-primary btn-sm" id="btn-add-sup">+ Add Supplier</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="sup-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Supplier Name</th><th>Contact Person</th>
+              <th>Phone</th><th>Email</th><th>Category</th><th>Address</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="sup-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">Loading suppliers…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="sup-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="sup-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="sup-modal-title">Add Supplier</h3>
+      <button class="modal-close" id="sup-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sup-edit-id" />
+      <div class="form-grid">
+        <div class="input-group" style="grid-column:1/-1">
+          <label class="input-label">Supplier Name *</label>
+          <input class="input-field" id="sup-name" placeholder="e.g. RUSI Parts Inc." />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Contact Person</label>
+          <input class="input-field" id="sup-contact" placeholder="Full name" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Phone Number</label>
+          <input class="input-field" id="sup-phone" placeholder="09XXXXXXXXX" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Email</label>
+          <input class="input-field" type="email" id="sup-email" placeholder="supplier@email.com" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Category</label>
+          <select class="select-field" id="sup-category">
+            <option>Motorcycles</option>
+            <option>Spare Parts</option>
+            <option>Accessories</option>
+            <option>E-Bikes</option>
+            <option>General</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Status</label>
+          <select class="select-field" id="sup-status">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+        <div class="input-group" style="grid-column:1/-1">
+          <label class="input-label">Address</label>
+          <input class="input-field" id="sup-address" placeholder="Complete address" />
+        </div>
+        <div class="input-group" style="grid-column:1/-1">
+          <label class="input-label">Notes</label>
+          <textarea class="textarea-field" id="sup-notes" placeholder="Optional notes…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="sup-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="sup-modal-save">💾 Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { startClock, showToast, initSidebarToggle, Paginator } from './js/app.js';
+  import { logActivity } from './js/logs.js';
+  import { db } from './js/firebase-config.js';
+  import {
+    collection, getDocs, addDoc, updateDoc, deleteDoc,
+    doc, orderBy, query, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  requireAuth(); populateSidebarUser(); startClock(); initSidebarToggle();
+  document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
+
+  let allSuppliers = [], paginator;
+
+  async function loadSuppliers() {
+    const snap = await getDocs(query(collection(db, 'suppliers'), orderBy('name')));
+    allSuppliers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    applyFilters();
+    const active   = allSuppliers.filter(s => s.status === 'Active').length;
+    const inactive = allSuppliers.filter(s => s.status !== 'Active').length;
+    const cats     = new Set(allSuppliers.map(s => s.category)).size;
+    document.getElementById('sup-total').textContent     = allSuppliers.length;
+    document.getElementById('sup-active').textContent    = active;
+    document.getElementById('sup-inactive').textContent  = inactive;
+    document.getElementById('sup-categories').textContent= cats;
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('sup-search').value.toLowerCase();
+    const status = document.getElementById('sup-status-filter').value;
+    let filtered = allSuppliers.filter(s => {
+      const ms = !search || (s.name||'').toLowerCase().includes(search) || (s.contact||'').toLowerCase().includes(search);
+      const mt = !status || s.status === status;
+      return ms && mt;
+    });
+    paginator = new Paginator(filtered, 15);
+    renderPage(1);
+  }
+
+  function renderPage(n) {
+    const items = paginator.getPage(n);
+    const tbody = document.getElementById('sup-tbody');
+    if (!items.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">No suppliers found</td></tr>';
+    } else {
+      tbody.innerHTML = items.map((s, i) => `<tr>
+        <td class="text-muted">${(paginator.current-1)*15+i+1}</td>
+        <td class="fw-600">${s.name||'—'}</td>
+        <td>${s.contact||'—'}</td>
+        <td class="text-secondary">${s.phone||'—'}</td>
+        <td class="text-secondary">${s.email||'—'}</td>
+        <td><span class="badge badge-muted">${s.category||'—'}</span></td>
+        <td class="text-secondary" style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.address||'—'}</td>
+        <td><span class="badge ${s.status==='Active'?'badge-success':'badge-warning'}">${s.status||'Active'}</span></td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="editSupplier('${s.id}')">✏️</button>
+          <button class="btn btn-danger btn-sm"    onclick="deleteSupplier('${s.id}','${(s.name||'').replace(/'/g,"\\'")}')">🗑️</button>
+        </td>
+      </tr>`).join('');
+    }
+    paginator.renderControls('sup-pagination', renderPage);
+  }
+
+  const modal = document.getElementById('sup-modal');
+  const openModal  = () => modal.classList.add('show');
+  const closeModal = () => { modal.classList.remove('show'); resetForm(); };
+  const resetForm  = () => {
+    ['sup-edit-id','sup-name','sup-contact','sup-phone','sup-email','sup-address','sup-notes'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('sup-status').value   = 'Active';
+    document.getElementById('sup-modal-title').textContent = 'Add Supplier';
+  };
+
+  document.getElementById('btn-add-sup').addEventListener('click', openModal);
+  document.getElementById('sup-modal-close').addEventListener('click', closeModal);
+  document.getElementById('sup-modal-cancel').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  document.getElementById('sup-modal-save').addEventListener('click', async () => {
+    const name = document.getElementById('sup-name').value.trim();
+    if (!name) { showToast('Supplier name is required.', 'warning'); return; }
+    const editId = document.getElementById('sup-edit-id').value;
+    const data = {
+      name,
+      contact:  document.getElementById('sup-contact').value.trim(),
+      phone:    document.getElementById('sup-phone').value.trim(),
+      email:    document.getElementById('sup-email').value.trim(),
+      category: document.getElementById('sup-category').value,
+      status:   document.getElementById('sup-status').value,
+      address:  document.getElementById('sup-address').value.trim(),
+      notes:    document.getElementById('sup-notes').value.trim(),
+      updatedAt: serverTimestamp()
+    };
+    try {
+      if (editId) {
+        await updateDoc(doc(db, 'suppliers', editId), data);
+        await logActivity('SUPPLIERS', `Updated supplier: ${name}`);
+        showToast('Supplier updated.', 'success');
+      } else {
+        data.createdAt = serverTimestamp();
+        await addDoc(collection(db, 'suppliers'), data);
+        await logActivity('SUPPLIERS', `Added supplier: ${name}`);
+        showToast('Supplier added.', 'success');
+      }
+      closeModal(); loadSuppliers();
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  });
+
+  window.editSupplier = function(id) {
+    const s = allSuppliers.find(x => x.id === id); if (!s) return;
+    document.getElementById('sup-edit-id').value  = id;
+    document.getElementById('sup-name').value     = s.name    || '';
+    document.getElementById('sup-contact').value  = s.contact || '';
+    document.getElementById('sup-phone').value    = s.phone   || '';
+    document.getElementById('sup-email').value    = s.email   || '';
+    document.getElementById('sup-category').value = s.category|| 'General';
+    document.getElementById('sup-status').value   = s.status  || 'Active';
+    document.getElementById('sup-address').value  = s.address || '';
+    document.getElementById('sup-notes').value    = s.notes   || '';
+    document.getElementById('sup-modal-title').textContent = 'Edit Supplier';
+    openModal();
+  };
+
+  window.deleteSupplier = async function(id, name) {
+    if (!confirm(`Delete supplier "${name}"?`)) return;
+    try {
+      await deleteDoc(doc(db, 'suppliers', id));
+      await logActivity('SUPPLIERS', `Deleted supplier: ${name}`);
+      showToast('Supplier deleted.', 'success'); loadSuppliers();
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  };
+
+  document.getElementById('sup-search').addEventListener('input', applyFilters);
+  document.getElementById('sup-status-filter').addEventListener('change', applyFilters);
+  loadSuppliers();
+</script>
+</body>
+</html>

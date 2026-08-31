@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports – RUSI Motors IMS</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🏍️</div>
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">RUSI</span>
+      <span class="sidebar-brand-sub">Motors IMS</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <div class="nav-section-label">Management</div>
+    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <div class="nav-section-label">Analytics</div>
+    <a href="reports.html"    class="nav-item active"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-user-name">Admin</div>
+      <div class="user-role" id="sidebar-user-role">Administrator</div>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="top-header">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="header-title">
+      <h1>Reports &amp; Analytics</h1>
+      <p>Feature 4 — Business intelligence and performance overview</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-time" id="live-clock"></div>
+      <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ Print Report</button>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- KPI Summary -->
+    <div class="stats-grid mb-3">
+      <div class="stat-card" style="--stat-color:#2ecc71">
+        <div class="stat-icon-wrap">💰</div>
+        <div class="stat-info">
+          <div class="stat-val" id="r-total-rev">—</div>
+          <div class="stat-label">Total Revenue</div>
+          <div class="stat-change up" id="r-rev-sub">All time</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#3498db">
+        <div class="stat-icon-wrap">🛒</div>
+        <div class="stat-info">
+          <div class="stat-val" id="r-total-sales">—</div>
+          <div class="stat-label">Total Transactions</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#e63946">
+        <div class="stat-icon-wrap">📦</div>
+        <div class="stat-info">
+          <div class="stat-val" id="r-inv-value">—</div>
+          <div class="stat-label">Inventory Value</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f39c12">
+        <div class="stat-icon-wrap">📊</div>
+        <div class="stat-info">
+          <div class="stat-val" id="r-avg-sale">—</div>
+          <div class="stat-label">Avg. Sale Value</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row 1 -->
+    <div class="grid-2 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">📈</span> Revenue by Month</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">🏆</span> Top 5 Best-Selling Units</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="topUnitsChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row 2 -->
+    <div class="grid-2 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">💳</span> Sales by Payment Method</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="paymentChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">📦</span> Inventory by Category</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="invCatChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top selling table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="card-title-icon">📋</span> Sales Summary by Unit</span>
+        <button class="btn btn-secondary btn-sm" onclick="exportTableCSV('r-table','sales-report.csv')">⬇️ Export CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="r-table">
+          <thead>
+            <tr><th>Unit / Item</th><th>Units Sold</th><th>Total Revenue</th><th>Avg. Price</th><th>Last Sale</th></tr>
+          </thead>
+          <tbody id="r-tbody">
+            <tr><td colspan="5" style="text-align:center;padding:2rem" class="text-muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { startClock, showToast, initSidebarToggle, formatPeso, exportTableCSV } from './js/app.js';
+  import { db } from './js/firebase-config.js';
+  import {
+    collection, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  requireAuth(); populateSidebarUser(); startClock(); initSidebarToggle();
+  document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
+  window.exportTableCSV = exportTableCSV;
+
+  Chart.defaults.color        = '#8B92A5';
+  Chart.defaults.borderColor  = 'rgba(255,255,255,0.07)';
+  Chart.defaults.font.family  = 'Inter';
+
+  async function loadReports() {
+    try {
+      const [salesSnap, invSnap] = await Promise.all([
+        getDocs(query(collection(db, 'sales'), orderBy('date', 'desc'))),
+        getDocs(collection(db, 'inventory'))
+      ]);
+
+      const sales = salesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const inv   = invSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+      // KPIs
+      let totalRev = 0;
+      const monthRev = Array(12).fill(0);
+      const unitMap  = {};
+      const payMap   = {};
+
+      sales.forEach(s => {
+        const amt  = Number(s.amount || 0);
+        const date = s.date?.toDate ? s.date.toDate() : new Date(s.date);
+        totalRev += amt;
+        monthRev[date.getMonth()] += amt;
+
+        const unit = s.unit || 'Unknown';
+        if (!unitMap[unit]) unitMap[unit] = { count: 0, total: 0, last: date };
+        unitMap[unit].count++;
+        unitMap[unit].total += amt;
+        if (date > unitMap[unit].last) unitMap[unit].last = date;
+
+        const pm = s.payment || 'Cash';
+        payMap[pm] = (payMap[pm] || 0) + 1;
+      });
+
+      let invValue = 0;
+      const catMap = {};
+      inv.forEach(i => {
+        const val = Number(i.price || 0) * Number(i.quantity || 0);
+        invValue += val;
+        const cat = i.category || 'Other';
+        catMap[cat] = (catMap[cat] || 0) + Number(i.quantity || 0);
+      });
+
+      // Stats
+      document.getElementById('r-total-rev').textContent   = formatPeso(totalRev);
+      document.getElementById('r-total-sales').textContent = sales.length;
+      document.getElementById('r-inv-value').textContent   = formatPeso(invValue);
+      document.getElementById('r-avg-sale').textContent    = sales.length
+        ? formatPeso(totalRev / sales.length) : '₱0.00';
+
+      // Revenue chart
+      new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+          datasets: [{
+            label: 'Revenue (₱)',
+            data: monthRev,
+            borderColor: '#e63946',
+            backgroundColor: 'rgba(230,57,70,0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#e63946',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => '₱' + v.toLocaleString() } } }
+        }
+      });
+
+      // Top units chart
+      const sorted = Object.entries(unitMap).sort((a,b) => b[1].count - a[1].count).slice(0, 5);
+      new Chart(document.getElementById('topUnitsChart'), {
+        type: 'bar',
+        data: {
+          labels: sorted.map(([k]) => k),
+          datasets: [{
+            label: 'Units Sold',
+            data: sorted.map(([,v]) => v.count),
+            backgroundColor: ['#e63946','#f4a261','#2ecc71','#3498db','#9b59b6'],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+          indexAxis: 'y'
+        }
+      });
+
+      // Payment chart
+      new Chart(document.getElementById('paymentChart'), {
+        type: 'pie',
+        data: {
+          labels: Object.keys(payMap),
+          datasets: [{
+            data: Object.values(payMap),
+            backgroundColor: ['#e63946','#f4a261','#2ecc71','#3498db','#9b59b6'],
+            borderColor: '#161A22', borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { padding: 14 } } }
+        }
+      });
+
+      // Inventory category chart
+      new Chart(document.getElementById('invCatChart'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(catMap),
+          datasets: [{
+            data: Object.values(catMap),
+            backgroundColor: ['#e63946','#f4a261','#2ecc71','#3498db'],
+            borderColor: '#161A22', borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          cutout: '55%',
+          plugins: { legend: { position: 'bottom', labels: { padding: 14 } } }
+        }
+      });
+
+      // Summary table
+      const tbody = document.getElementById('r-tbody');
+      if (!sorted.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem" class="text-muted">No sales data</td></tr>';
+      } else {
+        tbody.innerHTML = sorted.concat(
+          Object.entries(unitMap).sort((a,b) => b[1].count - a[1].count).slice(5)
+        ).map(([unit, data]) => `<tr>
+          <td class="fw-600">${unit}</td>
+          <td class="fw-700 text-info">${data.count}</td>
+          <td class="fw-700 text-success">${formatPeso(data.total)}</td>
+          <td class="text-secondary">${formatPeso(data.total / data.count)}</td>
+          <td class="text-secondary">${data.last.toLocaleDateString('en-PH')}</td>
+        </tr>`).join('');
+      }
+
+    } catch (err) {
+      showToast('Failed to load reports: ' + err.message, 'error');
+      console.error(err);
+    }
+  }
+
+  loadReports();
+</script>
+</body>
+</html>

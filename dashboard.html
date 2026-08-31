@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – RUSI Motors IMS</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🏍️</div>
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">RUSI</span>
+      <span class="sidebar-brand-sub">Motors IMS</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="dashboard.html"  class="nav-item active"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+
+    <div class="nav-section-label">Management</div>
+    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock <span class="nav-badge" id="sb-lowstock-badge">—</span></a>
+
+    <div class="nav-section-label">Analytics</div>
+    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-user-name">Admin</div>
+      <div class="user-role" id="sidebar-user-role">Administrator</div>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+  </div>
+</aside>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div class="main-content">
+
+  <!-- Header -->
+  <header class="top-header">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="header-title">
+      <h1>Dashboard</h1>
+      <p>RUSI Motors Inventory Management System</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-time" id="live-clock"></div>
+      <button class="btn-icon" onclick="window.location.href='lowstock.html'" title="Low Stock Alerts">
+        🔔
+        <span class="notif-dot" id="notif-dot" style="display:none"></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- KPI Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card" style="--stat-color:#e63946; --stat-rgb:230,57,70">
+        <div class="stat-icon-wrap">🏍️</div>
+        <div class="stat-info">
+          <div class="stat-val" id="stat-total-units">—</div>
+          <div class="stat-label">Total Units</div>
+          <div class="stat-change up" id="stat-units-change">Loading…</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#2ecc71; --stat-rgb:46,204,113">
+        <div class="stat-icon-wrap">💰</div>
+        <div class="stat-info">
+          <div class="stat-val" id="stat-revenue">—</div>
+          <div class="stat-label">Monthly Revenue</div>
+          <div class="stat-change up" id="stat-rev-change">Loading…</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f39c12; --stat-rgb:243,156,18">
+        <div class="stat-icon-wrap">⚠️</div>
+        <div class="stat-info">
+          <div class="stat-val" id="stat-lowstock">—</div>
+          <div class="stat-label">Low Stock Items</div>
+          <div class="stat-change down" id="stat-low-change">Needs attention</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#3498db; --stat-rgb:52,152,219">
+        <div class="stat-icon-wrap">🏭</div>
+        <div class="stat-info">
+          <div class="stat-val" id="stat-suppliers">—</div>
+          <div class="stat-label">Active Suppliers</div>
+          <div class="stat-change up" id="stat-sup-change">Loading…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="grid-2 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">📈</span> Monthly Sales (Units)</span>
+          <select class="select-field" style="width:auto;font-size:0.8rem" id="sales-chart-year">
+            <option>2026</option><option>2025</option>
+          </select>
+        </div>
+        <div class="chart-container">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">🥧</span> Inventory by Category</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="grid-2">
+
+      <!-- Recent Sales -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">💰</span> Recent Sales</span>
+          <a href="sales.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Unit</th><th>Customer</th><th>Amount</th><th>Date</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recent-sales-body">
+              <tr><td colspan="5" class="text-secondary" style="text-align:center;padding:1.5rem">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Low Stock Quick View -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">⚠️</span> Low Stock Alerts</span>
+          <a href="lowstock.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr><th>Item</th><th>Category</th><th>Stock</th><th>Min</th></tr>
+            </thead>
+            <tbody id="lowstock-body">
+              <tr><td colspan="4" class="text-secondary" style="text-align:center;padding:1.5rem">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<script type="module">
+  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { startClock, formatPeso, showToast, initSidebarToggle } from './js/app.js';
+  import { db } from './js/firebase-config.js';
+  import {
+    collection, getDocs, query, orderBy, limit, where, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  requireAuth();
+  populateSidebarUser();
+  startClock();
+  initSidebarToggle();
+
+  document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
+
+  // ── Chart defaults ─────────────────────────────────────
+  Chart.defaults.color          = '#8B92A5';
+  Chart.defaults.borderColor    = 'rgba(255,255,255,0.07)';
+  Chart.defaults.font.family    = 'Inter';
+
+  // ── Sales Bar Chart ────────────────────────────────────
+  const salesCtx = document.getElementById('salesChart').getContext('2d');
+  const salesChart = new Chart(salesCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets: [{
+        label: 'Units Sold',
+        data: Array(12).fill(0),
+        backgroundColor: 'rgba(230,57,70,0.7)',
+        borderColor:     '#e63946',
+        borderWidth: 1,
+        borderRadius: 5
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+
+  // ── Category Doughnut Chart ────────────────────────────
+  const catCtx = document.getElementById('categoryChart').getContext('2d');
+  const catChart = new Chart(catCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Motorcycles', 'Spare Parts', 'Accessories', 'E-Bikes'],
+      datasets: [{
+        data: [0, 0, 0, 0],
+        backgroundColor: ['#e63946','#f4a261','#2ecc71','#3498db'],
+        borderColor: '#161A22',
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { padding: 14, font: { size: 12 } } }
+      },
+      cutout: '62%'
+    }
+  });
+
+  // ── Load Dashboard Data ────────────────────────────────
+  async function loadDashboard() {
+    try {
+      // Inventory stats
+      const invSnap = await getDocs(collection(db, 'inventory'));
+      let totalUnits = 0, lowStockCount = 0;
+      const catCounts = { Motorcycles: 0, 'Spare Parts': 0, Accessories: 0, 'E-Bikes': 0 };
+      const lowItems  = [];
+
+      invSnap.forEach(doc => {
+        const d = doc.data();
+        totalUnits += Number(d.quantity || 0);
+        const cat = d.category || 'Motorcycles';
+        if (catCounts[cat] !== undefined) catCounts[cat] += Number(d.quantity || 0);
+        if (Number(d.quantity) <= Number(d.minStock || 5)) {
+          lowStockCount++;
+          if (lowItems.length < 5) lowItems.push({ id: doc.id, ...d });
+        }
+      });
+
+      document.getElementById('stat-total-units').textContent = totalUnits.toLocaleString();
+      document.getElementById('stat-units-change').textContent = `${invSnap.size} SKUs tracked`;
+      document.getElementById('stat-lowstock').textContent   = lowStockCount;
+      if (lowStockCount > 0) {
+        document.getElementById('notif-dot').style.display = 'block';
+        document.getElementById('sb-lowstock-badge').textContent = lowStockCount;
+      } else {
+        document.getElementById('sb-lowstock-badge').textContent = '0';
+      }
+
+      catChart.data.datasets[0].data = Object.values(catCounts);
+      catChart.update();
+
+      // Low stock table
+      const lsBody = document.getElementById('lowstock-body');
+      if (lowItems.length === 0) {
+        lsBody.innerHTML = '<tr><td colspan="4" class="text-muted" style="text-align:center;padding:1.5rem">✅ All stock levels OK</td></tr>';
+      } else {
+        lsBody.innerHTML = lowItems.map(i => `
+          <tr>
+            <td class="fw-600">${i.name || '—'}</td>
+            <td><span class="badge badge-muted">${i.category || '—'}</span></td>
+            <td><span class="text-danger fw-700">${i.quantity}</span></td>
+            <td class="text-muted">${i.minStock || 5}</td>
+          </tr>`).join('');
+      }
+
+      // Suppliers count
+      const supSnap = await getDocs(collection(db, 'suppliers'));
+      document.getElementById('stat-suppliers').textContent = supSnap.size;
+      document.getElementById('stat-sup-change').textContent = `${supSnap.size} active suppliers`;
+
+      // Sales data
+      const now       = new Date();
+      const startMonth= new Date(now.getFullYear(), now.getMonth(), 1);
+      const salesSnap = await getDocs(query(collection(db, 'sales'), orderBy('date', 'desc'), limit(50)));
+      let monthRevenue = 0;
+      const monthlyCounts = Array(12).fill(0);
+      const recentSales   = [];
+
+      salesSnap.forEach(doc => {
+        const d = doc.data();
+        const sDate = d.date?.toDate ? d.date.toDate() : new Date(d.date);
+        if (sDate >= startMonth) monthRevenue += Number(d.amount || 0);
+        monthlyCounts[sDate.getMonth()] += 1;
+        if (recentSales.length < 5) recentSales.push({ id: doc.id, ...d });
+      });
+
+      document.getElementById('stat-revenue').textContent    = formatPeso(monthRevenue);
+      document.getElementById('stat-rev-change').textContent = `Month of ${now.toLocaleString('en-PH', { month: 'long', year: 'numeric' })}`;
+
+      salesChart.data.datasets[0].data = monthlyCounts;
+      salesChart.update();
+
+      // Recent sales table
+      const rsBody = document.getElementById('recent-sales-body');
+      if (recentSales.length === 0) {
+        rsBody.innerHTML = '<tr><td colspan="5" class="text-muted" style="text-align:center;padding:1.5rem">No sales recorded yet</td></tr>';
+      } else {
+        rsBody.innerHTML = recentSales.map(s => {
+          const sDate = s.date?.toDate ? s.date.toDate() : new Date(s.date);
+          const status = s.status || 'Completed';
+          const badgeCls = status === 'Completed' ? 'badge-success' : (status === 'Pending' ? 'badge-warning' : 'badge-danger');
+          return `<tr>
+            <td class="fw-600">${s.unit || '—'}</td>
+            <td>${s.customer || '—'}</td>
+            <td class="text-success fw-600">${formatPeso(s.amount)}</td>
+            <td class="text-secondary">${sDate.toLocaleDateString('en-PH')}</td>
+            <td><span class="badge ${badgeCls}">${status}</span></td>
+          </tr>`;
+        }).join('');
+      }
+
+    } catch (err) {
+      showToast('Failed to load dashboard data: ' + err.message, 'error');
+      console.error(err);
+    }
+  }
+
+  loadDashboard();
+</script>
+</body>
+</html>

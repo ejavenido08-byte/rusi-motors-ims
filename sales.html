@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales – RUSI Motors IMS</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>" />
+</head>
+<body>
+
+<div id="toast-container" class="toast-container"></div>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">🏍️</div>
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-name">RUSI</span>
+      <span class="sidebar-brand-sub">Motors IMS</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"      class="nav-item active"><span class="nav-icon">💰</span> Sales</a>
+    <div class="nav-section-label">Management</div>
+    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <div class="nav-section-label">Analytics</div>
+    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+  </nav>
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-user-avatar">AD</div>
+    <div class="user-info">
+      <div class="user-name" id="sidebar-user-name">Admin</div>
+      <div class="user-role" id="sidebar-user-role">Administrator</div>
+    </div>
+    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+  </div>
+</aside>
+
+<div class="main-content">
+  <header class="top-header">
+    <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+    <div class="header-title">
+      <h1>Sales Tracking</h1>
+      <p>Feature 2 — Record and monitor motorcycle sales transactions</p>
+    </div>
+    <div class="header-actions">
+      <div class="header-time" id="live-clock"></div>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <div class="stats-grid mb-3">
+      <div class="stat-card" style="--stat-color:#2ecc71">
+        <div class="stat-icon-wrap">💰</div>
+        <div class="stat-info">
+          <div class="stat-val" id="s-total-rev">—</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#3498db">
+        <div class="stat-icon-wrap">🛒</div>
+        <div class="stat-info">
+          <div class="stat-val" id="s-total-sold">—</div>
+          <div class="stat-label">Units Sold</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#e63946">
+        <div class="stat-icon-wrap">📅</div>
+        <div class="stat-info">
+          <div class="stat-val" id="s-month-rev">—</div>
+          <div class="stat-label">This Month</div>
+        </div>
+      </div>
+      <div class="stat-card" style="--stat-color:#f39c12">
+        <div class="stat-icon-wrap">⏳</div>
+        <div class="stat-info">
+          <div class="stat-val" id="s-pending">—</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><span class="card-title-icon">💰</span> Sales Records</span>
+        <div class="flex gap-1 flex-wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="s-search" placeholder="Search by unit or customer…" />
+          </div>
+          <select class="select-field" id="s-status-filter" style="width:auto">
+            <option value="">All Status</option>
+            <option>Completed</option>
+            <option>Pending</option>
+            <option>Cancelled</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" onclick="exportCSV()">⬇️ Export</button>
+          <button class="btn btn-primary btn-sm" id="btn-add-sale">+ Record Sale</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="s-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Unit / Item</th><th>Customer</th><th>Contact</th>
+              <th>Amount</th><th>Payment</th><th>Date</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="s-tbody">
+            <tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">Loading sales…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="s-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="s-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="s-modal-title">Record New Sale</h3>
+      <button class="modal-close" id="s-modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="s-edit-id" />
+      <div class="form-grid">
+        <div class="input-group">
+          <label class="input-label">Unit / Item Sold *</label>
+          <input class="input-field" id="s-unit" placeholder="e.g. RUSI GS50 125cc" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Customer Name *</label>
+          <input class="input-field" id="s-customer" placeholder="Full name" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Contact Number</label>
+          <input class="input-field" id="s-contact" placeholder="09XXXXXXXXX" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Sale Amount (₱) *</label>
+          <input class="input-field" type="number" id="s-amount" min="0" step="0.01" placeholder="0.00" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">Payment Method</label>
+          <select class="select-field" id="s-payment">
+            <option>Cash</option>
+            <option>Installment</option>
+            <option>Bank Transfer</option>
+            <option>GCash</option>
+            <option>Maya</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Status</label>
+          <select class="select-field" id="s-status">
+            <option>Completed</option>
+            <option>Pending</option>
+            <option>Cancelled</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label class="input-label">Sale Date *</label>
+          <input class="input-field" type="date" id="s-date" />
+        </div>
+        <div class="input-group">
+          <label class="input-label">OR Number</label>
+          <input class="input-field" id="s-or" placeholder="Official Receipt #" />
+        </div>
+        <div class="input-group" style="grid-column:1/-1">
+          <label class="input-label">Notes</label>
+          <textarea class="textarea-field" id="s-notes" placeholder="Optional notes…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="s-modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="s-modal-save">💾 Save Sale</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { startClock, showToast, initSidebarToggle, formatPeso, exportTableCSV, Paginator } from './js/app.js';
+  import { logActivity } from './js/logs.js';
+  import { db } from './js/firebase-config.js';
+  import {
+    collection, getDocs, addDoc, updateDoc, deleteDoc,
+    doc, orderBy, query, serverTimestamp, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  requireAuth();
+  populateSidebarUser();
+  startClock();
+  initSidebarToggle();
+  document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
+
+  // Set default date to today
+  document.getElementById('s-date').value = new Date().toISOString().split('T')[0];
+
+  let allSales = [];
+  let paginator;
+
+  window.exportCSV = () => exportTableCSV('s-table', 'sales.csv');
+
+  async function loadSales() {
+    const snap = await getDocs(query(collection(db, 'sales'), orderBy('date', 'desc')));
+    allSales = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    applyFilters();
+    updateStats();
+  }
+
+  function updateStats() {
+    const now        = new Date();
+    const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    let totalRev = 0, monthRev = 0, pending = 0;
+
+    allSales.forEach(s => {
+      const amt  = Number(s.amount || 0);
+      const date = s.date?.toDate ? s.date.toDate() : new Date(s.date);
+      totalRev += amt;
+      if (date >= startMonth) monthRev += amt;
+      if (s.status === 'Pending') pending++;
+    });
+
+    document.getElementById('s-total-rev').textContent  = formatPeso(totalRev);
+    document.getElementById('s-total-sold').textContent = allSales.length;
+    document.getElementById('s-month-rev').textContent  = formatPeso(monthRev);
+    document.getElementById('s-pending').textContent    = pending;
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('s-search').value.toLowerCase();
+    const status = document.getElementById('s-status-filter').value;
+    let filtered = allSales.filter(s => {
+      const matchS = !search ||
+        (s.unit     || '').toLowerCase().includes(search) ||
+        (s.customer || '').toLowerCase().includes(search);
+      const matchSt = !status || s.status === status;
+      return matchS && matchSt;
+    });
+    paginator = new Paginator(filtered, 15);
+    renderPage(1);
+  }
+
+  function renderPage(n) {
+    const items = paginator.getPage(n);
+    const tbody = document.getElementById('s-tbody');
+    if (items.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:2rem" class="text-muted">No sales found</td></tr>';
+    } else {
+      tbody.innerHTML = items.map((s, idx) => {
+        const date = s.date?.toDate ? s.date.toDate() : new Date(s.date);
+        const st   = s.status || 'Completed';
+        const bc   = st === 'Completed' ? 'badge-success' : st === 'Pending' ? 'badge-warning' : 'badge-danger';
+        return `<tr>
+          <td class="text-muted">${(paginator.current - 1) * 15 + idx + 1}</td>
+          <td class="fw-600">${s.unit || '—'}</td>
+          <td>${s.customer || '—'}</td>
+          <td class="text-secondary">${s.contact || '—'}</td>
+          <td class="text-success fw-700">${formatPeso(s.amount)}</td>
+          <td class="text-secondary">${s.payment || '—'}</td>
+          <td class="text-secondary">${date.toLocaleDateString('en-PH')}</td>
+          <td><span class="badge ${bc}">${st}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="editSale('${s.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm"    onclick="deleteSale('${s.id}','${(s.unit||'').replace(/'/g,"\\'")}')">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    paginator.renderControls('s-pagination', renderPage);
+  }
+
+  const modal = document.getElementById('s-modal');
+  function openModal()  { modal.classList.add('show'); }
+  function closeModal() { modal.classList.remove('show'); resetForm(); }
+  function resetForm()  {
+    ['s-edit-id','s-unit','s-customer','s-contact','s-amount','s-or','s-notes'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    document.getElementById('s-date').value   = new Date().toISOString().split('T')[0];
+    document.getElementById('s-status').value = 'Completed';
+    document.getElementById('s-modal-title').textContent = 'Record New Sale';
+  }
+
+  document.getElementById('btn-add-sale').addEventListener('click', openModal);
+  document.getElementById('s-modal-close').addEventListener('click', closeModal);
+  document.getElementById('s-modal-cancel').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  document.getElementById('s-modal-save').addEventListener('click', async () => {
+    const unit     = document.getElementById('s-unit').value.trim();
+    const customer = document.getElementById('s-customer').value.trim();
+    const amount   = document.getElementById('s-amount').value;
+    const dateVal  = document.getElementById('s-date').value;
+    if (!unit || !customer || !amount || !dateVal) {
+      showToast('Unit, customer, amount, and date are required.', 'warning'); return;
+    }
+    const editId = document.getElementById('s-edit-id').value;
+    const data = {
+      unit, customer,
+      contact: document.getElementById('s-contact').value.trim(),
+      amount:  Number(amount),
+      payment: document.getElementById('s-payment').value,
+      status:  document.getElementById('s-status').value,
+      date:    Timestamp.fromDate(new Date(dateVal)),
+      or:      document.getElementById('s-or').value.trim(),
+      notes:   document.getElementById('s-notes').value.trim(),
+      updatedAt: serverTimestamp()
+    };
+    try {
+      if (editId) {
+        await updateDoc(doc(db, 'sales', editId), data);
+        await logActivity('SALES', `Updated sale: ${unit} to ${customer}`);
+        showToast('Sale updated.', 'success');
+      } else {
+        data.createdAt = serverTimestamp();
+        await addDoc(collection(db, 'sales'), data);
+        await logActivity('SALES', `Recorded sale: ${unit} to ${customer} for ₱${amount}`);
+        showToast('Sale recorded.', 'success');
+      }
+      closeModal(); loadSales();
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  });
+
+  window.editSale = function(id) {
+    const s = allSales.find(x => x.id === id); if (!s) return;
+    const date = s.date?.toDate ? s.date.toDate() : new Date(s.date);
+    document.getElementById('s-edit-id').value    = id;
+    document.getElementById('s-unit').value       = s.unit     || '';
+    document.getElementById('s-customer').value   = s.customer || '';
+    document.getElementById('s-contact').value    = s.contact  || '';
+    document.getElementById('s-amount').value     = s.amount   || '';
+    document.getElementById('s-payment').value    = s.payment  || 'Cash';
+    document.getElementById('s-status').value     = s.status   || 'Completed';
+    document.getElementById('s-date').value       = date.toISOString().split('T')[0];
+    document.getElementById('s-or').value         = s.or       || '';
+    document.getElementById('s-notes').value      = s.notes    || '';
+    document.getElementById('s-modal-title').textContent = 'Edit Sale';
+    openModal();
+  };
+
+  window.deleteSale = async function(id, unit) {
+    if (!confirm(`Delete sale of "${unit}"?`)) return;
+    try {
+      await deleteDoc(doc(db, 'sales', id));
+      await logActivity('SALES', `Deleted sale: ${unit}`);
+      showToast('Sale deleted.', 'success'); loadSales();
+    } catch (err) { showToast('Error: ' + err.message, 'error'); }
+  };
+
+  document.getElementById('s-search').addEventListener('input', applyFilters);
+  document.getElementById('s-status-filter').addEventListener('change', applyFilters);
+
+  loadSales();
+</script>
+</body>
+</html>
