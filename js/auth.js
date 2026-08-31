@@ -1,9 +1,5 @@
 import { auth } from './firebase-config.js';
-import {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { logActivity } from './logs.js';
 
 function getBasePath() {
@@ -13,17 +9,13 @@ function getBasePath() {
 
 export function requireAuth() {
   onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      window.location.replace(getBasePath() + 'index.html');
-    }
+    if (!user) window.location.replace(getBasePath() + 'index.html');
   });
 }
 
 export function redirectIfLoggedIn() {
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      window.location.replace(getBasePath() + 'dashboard.html');
-    }
+    if (user) window.location.replace(getBasePath() + 'dashboard.html');
   });
 }
 
@@ -35,9 +27,7 @@ export async function loginUser(email, password) {
 
 export async function logoutUser() {
   const user = auth.currentUser;
-  if (user) {
-    logActivity('AUTH', `User logged out: ${user.email}`, user.uid).catch(() => {});
-  }
+  if (user) logActivity('AUTH', `User logged out: ${user.email}`, user.uid).catch(() => {});
   try { await signOut(auth); } catch (e) {}
   window.location.replace(getBasePath() + 'index.html');
 }
