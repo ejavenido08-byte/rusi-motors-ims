@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RUSI Motors – Login</title>
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>" />
 </head>
 <body>
 <div class="login-page">
+
   <div class="login-brand">
     <div class="login-brand-grid"></div>
     <div class="brand-logo-wrap">
@@ -29,15 +31,13 @@
   <div class="login-form-panel">
     <div class="login-box">
 
-      <!-- STEP 1: Email + Password -->
+      <!-- STEP 1 -->
       <div id="step-login">
         <div class="login-box-header">
           <h2>Welcome back 👋</h2>
           <p>Admin signs in directly. Staff &amp; Manager receive an OTP.</p>
         </div>
-        <div class="login-error" id="login-error">
-          ⚠️ <span id="login-error-msg"></span>
-        </div>
+        <div class="login-error" id="login-error">⚠️ <span id="login-error-msg"></span></div>
         <form id="login-form" novalidate>
           <div class="form-group">
             <label class="form-label">Email Address</label>
@@ -61,15 +61,13 @@
         </div>
       </div>
 
-      <!-- STEP 2: OTP (Staff/Manager only) -->
+      <!-- STEP 2: OTP -->
       <div id="step-otp" style="display:none">
         <div class="login-box-header">
           <h2>Check your email 📧</h2>
-          <p id="otp-sent-desc">Enter the 6-digit code sent to your email</p>
+          <p id="otp-sent-desc">Enter the 6-digit code</p>
         </div>
-        <div class="login-error" id="otp-error">
-          ⚠️ <span id="otp-error-msg"></span>
-        </div>
+        <div class="login-error" id="otp-error">⚠️ <span id="otp-error-msg"></span></div>
         <div style="text-align:center;margin:1.5rem 0">
           <div style="font-size:3.5rem">📨</div>
           <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:0.5rem">
@@ -89,9 +87,7 @@
         </div>
       </div>
 
-      <div class="login-footer" style="margin-top:2rem">
-        &copy; 2026 RUSI Motors Corporation &nbsp;•&nbsp; All rights reserved
-      </div>
+      <div class="login-footer" style="margin-top:2rem">&copy; 2026 RUSI Motors Corporation</div>
     </div>
   </div>
 </div>
@@ -99,13 +95,25 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script type="module">
-  import { loginUser, getBasePath } from './js/auth.js';
-  import { sendOTP, verifyOTP }     from './js/otp.js';
-  import { showToast }              from './js/app.js';
-  import { auth }                   from './js/firebase-config.js';
-  import { onAuthStateChanged }     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { auth, db }           from './js/firebase-config.js';
+  import { sendOTP, verifyOTP } from './js/otp.js';
+  import { showToast }          from './js/app.js';
+  import { logActivity }        from './js/logs.js';
+  import {
+    signInWithEmailAndPassword,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // Already logged in → go to dashboard
+  // Base path for GitHub Pages
+  function getBasePath() {
+    const p = window.location.pathname;
+    return p.substring(0, p.lastIndexOf('/') + 1);
+  }
+
+  // Already logged in → dashboard
   onAuthStateChanged(auth, (user) => {
     if (user) window.location.replace(getBasePath() + 'dashboard.html');
   });
@@ -118,43 +126,60 @@
 
   // Eye icon toggle
   document.getElementById('toggle-pw').addEventListener('click', () => {
-    const pw  = document.getElementById('password');
+    const pw = document.getElementById('password');
     const btn = document.getElementById('toggle-pw');
     pw.type = pw.type === 'text' ? 'password' : 'text';
     btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
   });
 
-  // Numbers only for OTP
+  // Numbers only OTP
   document.getElementById('otp-input').addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
   });
 
-  // STEP 1: Login
+  // STEP 1: Login — get role from Firestore directly here
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     loginError.classList.remove('show');
     const email    = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
+
     if (!email || !password) {
       loginErrMsg.textContent = 'Please fill in all fields.';
       loginError.classList.add('show'); return;
     }
+
     const btn = document.getElementById('btn-login');
     btn.disabled  = true;
     btn.innerHTML = '<span class="spinner"></span> Signing in…';
-    try {
-      const user = await loginUser(email, password);
-      currentEmail = email;
-      currentName  = user.displayName || email.split('@')[0];
-      const role = sessionStorage.getItem('rusi_role') || 'Admin';
 
-      // Admin goes straight in — no OTP
+    try {
+      // 1. Authenticate with Firebase
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const uid = credential.user.uid;
+      currentEmail = email;
+      currentName  = credential.user.displayName || email.split('@')[0];
+
+      // 2. Get role directly from Firestore (not sessionStorage)
+      let role = 'Admin'; // default if no Firestore doc
+      try {
+        const snap = await getDoc(doc(db, 'users', uid));
+        if (snap.exists()) role = snap.data().role || 'Admin';
+      } catch (e) { role = 'Admin'; }
+
+      // 3. Save to sessionStorage
+      sessionStorage.setItem('rusi_role', role);
+
+      // 4. Log activity
+      logActivity('AUTH', `Logged in: ${email} [${role}]`, uid).catch(() => {});
+
+      // 5. Admin → straight to dashboard
       if (role === 'Admin') {
         window.location.replace(getBasePath() + 'dashboard.html');
         return;
       }
 
-      // Staff and Manager get OTP
+      // 6. Staff/Manager → send OTP first
       btn.innerHTML = '<span class="spinner"></span> Sending OTP…';
       await sendOTP(email, currentName);
       document.getElementById('step-login').style.display = 'none';
@@ -166,10 +191,10 @@
     } catch (err) {
       let msg = 'Invalid email or password.';
       if (err.code === 'auth/too-many-requests')     msg = 'Too many attempts. Try later.';
-      if (err.code === 'auth/user-not-found')         msg = 'No account with that email.';
+      if (err.code === 'auth/user-not-found')         msg = 'No account found.';
       if (err.code === 'auth/wrong-password')         msg = 'Wrong password.';
       if (err.code === 'auth/invalid-credential')     msg = 'Wrong email or password.';
-      if (err.code === 'auth/network-request-failed') msg = 'Network error. Check internet.';
+      if (err.code === 'auth/network-request-failed') msg = 'Network error.';
       loginErrMsg.textContent = msg;
       loginError.classList.add('show');
       btn.disabled  = false;
@@ -201,7 +226,7 @@
     } catch (err) { showToast('Failed: ' + err.message, 'error'); }
   });
 
-  // Back button
+  // Back
   document.getElementById('btn-back').addEventListener('click', () => {
     clearInterval(countdownTimer);
     document.getElementById('step-otp').style.display   = 'none';
@@ -211,244 +236,17 @@
     btn.innerHTML = 'Sign In';
   });
 
-  // Countdown
-  function startCountdown(seconds) {<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RUSI Motors – Login</title>
-  <link rel="stylesheet" href="css/style.css" />
-</head>
-<body>
-<div class="login-page">
-  <div class="login-brand">
-    <div class="login-brand-grid"></div>
-    <div class="brand-logo-wrap">
-      <div class="brand-logo-icon">🏍️</div>
-      <div class="brand-name">RUSI</div>
-      <div class="brand-sub">Motors Corporation</div>
-    </div>
-    <div class="brand-tagline">
-      <strong>Inventory Management System</strong>
-      Secured with OTP verification for Staff and Manager accounts.
-    </div>
-    <div class="brand-stats">
-      <div class="brand-stat"><div class="brand-stat-val">500+</div><div class="brand-stat-lbl">Branches</div></div>
-      <div class="brand-stat"><div class="brand-stat-val">24/7</div><div class="brand-stat-lbl">Uptime</div></div>
-      <div class="brand-stat"><div class="brand-stat-val">OTP</div><div class="brand-stat-lbl">Secured</div></div>
-    </div>
-  </div>
-
-  <div class="login-form-panel">
-    <div class="login-box">
-
-      <!-- STEP 1: Email + Password -->
-      <div id="step-login">
-        <div class="login-box-header">
-          <h2>Welcome back 👋</h2>
-          <p>Admin signs in directly. Staff &amp; Manager receive an OTP.</p>
-        </div>
-        <div class="login-error" id="login-error">
-          ⚠️ <span id="login-error-msg"></span>
-        </div>
-        <form id="login-form" novalidate>
-          <div class="form-group">
-            <label class="form-label">Email Address</label>
-            <div class="form-input-wrap">
-              <input class="form-input" type="email" id="email" placeholder="admin@rusimotors.com" autocomplete="email" />
-              <span class="form-input-icon">✉️</span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <div class="form-input-wrap">
-              <input class="form-input" type="password" id="password" placeholder="Enter your password" autocomplete="current-password" />
-              <span class="form-input-icon">🔒</span>
-              <button type="button" class="toggle-password" id="toggle-pw">👁️</button>
-            </div>
-          </div>
-          <button type="submit" class="btn-login" id="btn-login">Sign In</button>
-        </form>
-        <div style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--text-secondary)">
-          New staff or manager? <a href="register.html" style="color:var(--primary);font-weight:600">Create Account →</a>
-        </div>
-      </div>
-
-      <!-- STEP 2: OTP (Staff/Manager only) -->
-      <div id="step-otp" style="display:none">
-        <div class="login-box-header">
-          <h2>Check your email 📧</h2>
-          <p id="otp-sent-desc">Enter the 6-digit code sent to your email</p>
-        </div>
-        <div class="login-error" id="otp-error">
-          ⚠️ <span id="otp-error-msg"></span>
-        </div>
-        <div style="text-align:center;margin:1.5rem 0">
-          <div style="font-size:3.5rem">📨</div>
-          <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:0.5rem">
-            Expires in <span id="otp-countdown" style="color:var(--primary);font-weight:700">10:00</span>
-          </p>
-        </div>
-        <div class="form-group">
-          <label class="form-label">OTP Code</label>
-          <input class="form-input" type="text" id="otp-input" placeholder="123456" maxlength="6" inputmode="numeric"
-            style="text-align:center;font-size:2rem;font-weight:800;letter-spacing:10px;padding:1rem" />
-        </div>
-        <button class="btn-login" id="btn-verify">✅ Verify &amp; Enter</button>
-        <div style="text-align:center;margin-top:1rem;font-size:0.85rem">
-          <button id="btn-resend" type="button" style="background:none;border:none;color:var(--primary);cursor:pointer">🔁 Resend OTP</button>
-          &nbsp;|&nbsp;
-          <button id="btn-back" type="button" style="background:none;border:none;color:var(--text-secondary);cursor:pointer">← Back</button>
-        </div>
-      </div>
-
-      <div class="login-footer" style="margin-top:2rem">
-        &copy; 2026 RUSI Motors Corporation &nbsp;•&nbsp; All rights reserved
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="toast-container" id="toast-container"></div>
-
-<script type="module">
-  import { loginUser, getBasePath } from './js/auth.js';
-  import { sendOTP, verifyOTP }     from './js/otp.js';
-  import { showToast }              from './js/app.js';
-  import { auth }                   from './js/firebase-config.js';
-  import { onAuthStateChanged }     from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-  // Already logged in → go to dashboard
-  onAuthStateChanged(auth, (user) => {
-    if (user) window.location.replace(getBasePath() + 'dashboard.html');
-  });
-
-  const loginError  = document.getElementById('login-error');
-  const loginErrMsg = document.getElementById('login-error-msg');
-  const otpError    = document.getElementById('otp-error');
-  const otpErrMsg   = document.getElementById('otp-error-msg');
-  let currentEmail = '', currentName = '', countdownTimer;
-
-  // Eye icon toggle
-  document.getElementById('toggle-pw').addEventListener('click', () => {
-    const pw  = document.getElementById('password');
-    const btn = document.getElementById('toggle-pw');
-    pw.type = pw.type === 'text' ? 'password' : 'text';
-    btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
-  });
-
-  // Numbers only for OTP
-  document.getElementById('otp-input').addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
-  });
-
-  // STEP 1: Login
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginError.classList.remove('show');
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    if (!email || !password) {
-      loginErrMsg.textContent = 'Please fill in all fields.';
-      loginError.classList.add('show'); return;
-    }
-    const btn = document.getElementById('btn-login');
-    btn.disabled  = true;
-    btn.innerHTML = '<span class="spinner"></span> Signing in…';
-    try {
-      const user = await loginUser(email, password);
-      currentEmail = email;
-      currentName  = user.displayName || email.split('@')[0];
-      const role = sessionStorage.getItem('rusi_role') || 'Admin';
-
-      // Admin goes straight in — no OTP
-      if (role === 'Admin') {
-        window.location.replace(getBasePath() + 'dashboard.html');
-        return;
-      }
-
-      // Staff and Manager get OTP
-      btn.innerHTML = '<span class="spinner"></span> Sending OTP…';
-      await sendOTP(email, currentName);
-      document.getElementById('step-login').style.display = 'none';
-      document.getElementById('step-otp').style.display   = 'block';
-      document.getElementById('otp-sent-desc').textContent = `Code sent to ${email}`;
-      startCountdown(600);
-      showToast('OTP sent! Check your Gmail.', 'success');
-
-    } catch (err) {
-      let msg = 'Invalid email or password.';
-      if (err.code === 'auth/too-many-requests')     msg = 'Too many attempts. Try later.';
-      if (err.code === 'auth/user-not-found')         msg = 'No account with that email.';
-      if (err.code === 'auth/wrong-password')         msg = 'Wrong password.';
-      if (err.code === 'auth/invalid-credential')     msg = 'Wrong email or password.';
-      if (err.code === 'auth/network-request-failed') msg = 'Network error. Check internet.';
-      loginErrMsg.textContent = msg;
-      loginError.classList.add('show');
-      btn.disabled  = false;
-      btn.innerHTML = 'Sign In';
-    }
-  });
-
-  // STEP 2: Verify OTP
-  document.getElementById('btn-verify').addEventListener('click', () => {
-    otpError.classList.remove('show');
-    const code   = document.getElementById('otp-input').value.trim();
-    const result = verifyOTP(code, currentEmail);
-    if (!result.valid) {
-      otpErrMsg.textContent = result.reason;
-      otpError.classList.add('show'); return;
-    }
-    clearInterval(countdownTimer);
-    window.location.replace(getBasePath() + 'dashboard.html');
-  });
-
-  // Resend OTP
-  document.getElementById('btn-resend').addEventListener('click', async () => {
-    if (!currentEmail) return;
-    try {
-      await sendOTP(currentEmail, currentName);
-      startCountdown(600);
-      document.getElementById('otp-input').value = '';
-      showToast('New OTP sent!', 'success');
-    } catch (err) { showToast('Failed: ' + err.message, 'error'); }
-  });
-
-  // Back button
-  document.getElementById('btn-back').addEventListener('click', () => {
-    clearInterval(countdownTimer);
-    document.getElementById('step-otp').style.display   = 'none';
-    document.getElementById('step-login').style.display = 'block';
-    const btn = document.getElementById('btn-login');
-    btn.disabled  = false;
-    btn.innerHTML = 'Sign In';
-  });
-
-  // Countdown
+  // Countdown timer
   function startCountdown(seconds) {
     clearInterval(countdownTimer);
     let remaining = seconds;
     const el = document.getElementById('otp-countdown');
     const tick = () => {
-      if (remaining <= 0) { clearInterval(countdownTimer); if (el) { el.textContent = 'Expired ❌'; el.style.color = 'var(--danger)'; } return; }
-      const m = Math.floor(remaining / 60).toString().padStart(2, '0');
-      const s = (remaining % 60).toString().padStart(2, '0');
-      if (el) el.textContent = `${m}:${s}`;
-      remaining--;
-    };
-    tick();
-    countdownTimer = setInterval(tick, 1000);
-  }
-</script>
-</body>
-</html>
-
-    clearInterval(countdownTimer);
-    let remaining = seconds;
-    const el = document.getElementById('otp-countdown');
-    const tick = () => {
-      if (remaining <= 0) { clearInterval(countdownTimer); if (el) { el.textContent = 'Expired ❌'; el.style.color = 'var(--danger)'; } return; }
+      if (remaining <= 0) {
+        clearInterval(countdownTimer);
+        if (el) { el.textContent = 'Expired ❌'; el.style.color = 'var(--danger)'; }
+        return;
+      }
       const m = Math.floor(remaining / 60).toString().padStart(2, '0');
       const s = (remaining % 60).toString().padStart(2, '0');
       if (el) el.textContent = `${m}:${s}`;
