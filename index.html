@@ -3,9 +3,14 @@
   import { auth } from './js/firebase-config.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+  function getBasePath() {
+    const path = window.location.pathname;
+    return path.substring(0, path.lastIndexOf('/') + 1);
+  }
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      window.location.replace('dashboard.html');
+      window.location.replace(getBasePath() + 'dashboard.html');
     }
   });
 
@@ -39,7 +44,7 @@
 
     try {
       await loginUser(email, password);
-      window.location.replace('dashboard.html');
+      window.location.replace(getBasePath() + 'dashboard.html');
     } catch (err) {
       let msg = 'Invalid email or password. Please try again.';
       if (err.code === 'auth/too-many-requests')     msg = 'Too many failed attempts. Try again later.';
