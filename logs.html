@@ -1,125 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Activity Logs – RUSI Motors IMS</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>" />
+  <link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
-
 <div id="toast-container" class="toast-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
 <aside class="sidebar">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">🏍️</div>
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-name">RUSI</span>
-      <span class="sidebar-brand-sub">Motors IMS</span>
-    </div>
-  </div>
+  <div class="sidebar-header"><div class="sidebar-logo">🏍️</div><div class="sidebar-brand"><span class="sidebar-brand-name">RUSI</span><span class="sidebar-brand-sub">Motors IMS</span></div></div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
-    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
-    <a href="inventory.html"  class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
-    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html" class="nav-item"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html" class="nav-item"><span class="nav-icon">💰</span> Sales</a>
     <div class="nav-section-label">Management</div>
-    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
-    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
-    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <a href="suppliers.html" class="nav-item" data-min-role="Manager"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html" class="nav-item" data-role="Admin"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html" class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
     <div class="nav-section-label">Analytics</div>
-    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
-    <a href="logs.html"       class="nav-item active"><span class="nav-icon">📋</span> Activity Logs</a>
+    <a href="reports.html" class="nav-item" data-min-role="Manager"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html" class="nav-item active" data-role="Admin"><span class="nav-icon">📋</span> Activity Logs</a>
   </nav>
   <div class="sidebar-user">
     <div class="user-avatar" id="sidebar-user-avatar">AD</div>
-    <div class="user-info">
-      <div class="user-name" id="sidebar-user-name">Admin</div>
-      <div class="user-role" id="sidebar-user-role">Administrator</div>
-    </div>
-    <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
+    <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading…</div><div class="user-role" id="sidebar-user-role">—</div></div>
+    <button class="btn-logout" id="btn-logout">🚪</button>
   </div>
 </aside>
-
 <div class="main-content">
   <header class="top-header">
     <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-    <div class="header-title">
-      <h1>Activity Logs</h1>
-      <p>Feature 6 — Full audit trail of all system actions</p>
-    </div>
+    <div class="header-title"><h1>Activity Logs</h1><p>Feature 6 — Full audit trail (Admin only)</p></div>
     <div class="header-actions">
       <div class="header-time" id="live-clock"></div>
       <button class="btn btn-secondary btn-sm" id="btn-refresh">🔄 Refresh</button>
-      <button class="btn btn-secondary btn-sm" onclick="exportTableCSV('log-table','activity-logs.csv')">⬇️ Export</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportTableCSV('log-table','logs.csv')">⬇️ Export</button>
     </div>
   </header>
-
   <div class="page-body">
 
-    <div class="stats-grid mb-3">
-      <div class="stat-card" style="--stat-color:#3498db">
-        <div class="stat-icon-wrap">📋</div>
-        <div class="stat-info"><div class="stat-val" id="log-total">—</div><div class="stat-label">Total Entries</div></div>
-      </div>
-      <div class="stat-card" style="--stat-color:#2ecc71">
-        <div class="stat-icon-wrap">📦</div>
-        <div class="stat-info"><div class="stat-val" id="log-inv">—</div><div class="stat-label">Inventory Actions</div></div>
-      </div>
-      <div class="stat-card" style="--stat-color:#f39c12">
-        <div class="stat-icon-wrap">💰</div>
-        <div class="stat-info"><div class="stat-val" id="log-sales">—</div><div class="stat-label">Sales Actions</div></div>
-      </div>
-      <div class="stat-card" style="--stat-color:#e63946">
-        <div class="stat-icon-wrap">🔑</div>
-        <div class="stat-info"><div class="stat-val" id="log-auth">—</div><div class="stat-label">Auth Events</div></div>
-      </div>
+    <!-- Non-Admin blocked -->
+    <div id="blocked" style="display:none;text-align:center;padding:5rem 1rem">
+      <div style="font-size:3rem">🔒</div>
+      <h2 style="color:var(--text-primary);margin:1rem 0 0.5rem">Admin Only</h2>
+      <p style="color:var(--text-secondary)">Activity logs are restricted to Administrators.</p>
+      <a href="dashboard.html" class="btn btn-primary" style="margin-top:1.5rem;display:inline-flex">← Dashboard</a>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title"><span class="card-title-icon">📋</span> Audit Trail</span>
-        <div class="flex gap-1 flex-wrap">
-          <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="log-search" placeholder="Search actions or users…" />
+    <div id="page-content">
+      <div class="stats-grid mb-3">
+        <div class="stat-card" style="--stat-color:#3498db"><div class="stat-icon-wrap">📋</div><div class="stat-info"><div class="stat-val" id="log-total">—</div><div class="stat-label">Total Entries</div></div></div>
+        <div class="stat-card" style="--stat-color:#2ecc71"><div class="stat-icon-wrap">📦</div><div class="stat-info"><div class="stat-val" id="log-inv">—</div><div class="stat-label">Inventory</div></div></div>
+        <div class="stat-card" style="--stat-color:#f39c12"><div class="stat-icon-wrap">💰</div><div class="stat-info"><div class="stat-val" id="log-sales">—</div><div class="stat-label">Sales</div></div></div>
+        <div class="stat-card" style="--stat-color:#e63946"><div class="stat-icon-wrap">🔑</div><div class="stat-info"><div class="stat-val" id="log-auth">—</div><div class="stat-label">Auth Events</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><span class="card-title-icon">📋</span> Audit Trail</span>
+          <div class="flex gap-1 flex-wrap">
+            <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="log-search" placeholder="Search actions or users…"/></div>
+            <select class="select-field" id="log-module-filter" style="width:auto">
+              <option value="">All Modules</option>
+              <option>AUTH</option><option>INVENTORY</option><option>SALES</option>
+              <option>SUPPLIERS</option><option>USERS</option><option>SYSTEM</option>
+            </select>
           </div>
-          <select class="select-field" id="log-module-filter" style="width:auto">
-            <option value="">All Modules</option>
-            <option>AUTH</option>
-            <option>INVENTORY</option>
-            <option>SALES</option>
-            <option>SUPPLIERS</option>
-            <option>USERS</option>
-            <option>REPORTS</option>
-            <option>SYSTEM</option>
-          </select>
         </div>
+        <div id="log-timeline" style="padding:0 1rem">
+          <div class="text-muted" style="text-align:center;padding:3rem">Loading…</div>
+        </div>
+        <table class="data-table" id="log-table" style="display:none">
+          <thead><tr><th>Timestamp</th><th>Module</th><th>Action</th><th>User</th></tr></thead>
+          <tbody id="log-export-tbody"></tbody>
+        </table>
+        <div id="log-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
       </div>
-
-      <!-- Timeline log view -->
-      <div id="log-timeline" style="padding:0 1rem">
-        <div class="text-muted" style="text-align:center;padding:3rem">Loading activity logs…</div>
-      </div>
-
-      <!-- Also a hidden table for CSV export -->
-      <table class="data-table" id="log-table" style="display:none">
-        <thead>
-          <tr><th>Timestamp</th><th>Module</th><th>Action</th><th>User</th></tr>
-        </thead>
-        <tbody id="log-export-tbody"></tbody>
-      </table>
-
-      <div id="log-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
     </div>
-
   </div>
 </div>
-
 <script type="module">
-  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { requireAuth, logoutUser, populateSidebarUser, getCachedRole } from './js/auth.js';
   import { startClock, showToast, initSidebarToggle, exportTableCSV, Paginator } from './js/app.js';
   import { fetchLogs, formatLogTime, getModuleBadge } from './js/logs.js';
 
@@ -127,78 +89,66 @@
   document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
   window.exportTableCSV = exportTableCSV;
 
-  let allLogs = [], paginator;
+  let allLogs=[], paginator;
+
+  setTimeout(async () => {
+    const role = getCachedRole();
+    if (role !== 'Admin') {
+      document.getElementById('blocked').style.display      = 'block';
+      document.getElementById('page-content').style.display = 'none';
+      return;
+    }
+    loadLogs();
+  }, 800);
 
   async function loadLogs() {
-    document.getElementById('log-timeline').innerHTML =
-      '<div class="text-muted" style="text-align:center;padding:3rem"><span class="spinner"></span> Loading…</div>';
+    document.getElementById('log-timeline').innerHTML='<div class="text-muted" style="text-align:center;padding:3rem"><span class="spinner"></span> Loading…</div>';
     try {
       allLogs = await fetchLogs({ maxCount: 500 });
       document.getElementById('log-total').textContent = allLogs.length;
-      document.getElementById('log-inv').textContent   = allLogs.filter(l => l.module === 'INVENTORY').length;
-      document.getElementById('log-sales').textContent = allLogs.filter(l => l.module === 'SALES').length;
-      document.getElementById('log-auth').textContent  = allLogs.filter(l => l.module === 'AUTH').length;
+      document.getElementById('log-inv').textContent   = allLogs.filter(l=>l.module==='INVENTORY').length;
+      document.getElementById('log-sales').textContent = allLogs.filter(l=>l.module==='SALES').length;
+      document.getElementById('log-auth').textContent  = allLogs.filter(l=>l.module==='AUTH').length;
       applyFilters();
-    } catch (err) {
-      showToast('Failed to load logs: ' + err.message, 'error');
-    }
+    } catch(err){ showToast('Failed to load logs: '+err.message,'error'); }
   }
 
   function applyFilters() {
     const search = document.getElementById('log-search').value.toLowerCase();
     const mod    = document.getElementById('log-module-filter').value;
-    let filtered = allLogs.filter(l => {
-      const ms = !search || (l.action||'').toLowerCase().includes(search) || (l.userEmail||'').toLowerCase().includes(search);
-      const mm = !mod   || l.module === mod;
-      return ms && mm;
-    });
-    paginator = new Paginator(filtered, 25);
-    renderPage(1);
-    // Populate export table
-    const expTbody = document.getElementById('log-export-tbody');
-    expTbody.innerHTML = filtered.map(l => `<tr>
-      <td>${formatLogTime(l.timestamp)}</td>
-      <td>${l.module||'—'}</td>
-      <td>${l.action||'—'}</td>
-      <td>${l.userEmail||'—'}</td>
-    </tr>`).join('');
+    const filtered = allLogs.filter(l=>(!search||(l.action||'').toLowerCase().includes(search)||(l.userEmail||'').toLowerCase().includes(search))&&(!mod||l.module===mod));
+    paginator = new Paginator(filtered, 25); renderPage(1);
+    document.getElementById('log-export-tbody').innerHTML = filtered.map(l=>`<tr><td>${formatLogTime(l.timestamp)}</td><td>${l.module||'—'}</td><td>${l.action||'—'}</td><td>${l.userEmail||'—'}</td></tr>`).join('');
   }
 
   function renderPage(n) {
-    const items    = paginator.getPage(n);
+    const items = paginator.getPage(n);
     const timeline = document.getElementById('log-timeline');
-
-    if (!items.length) {
-      timeline.innerHTML = '<div class="empty-state"><div class="empty-icon">📭</div><p>No log entries found</p></div>';
-    } else {
-      timeline.innerHTML = items.map(log => {
+    if (!items.length) { timeline.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div><p>No log entries found</p></div>'; }
+    else {
+      timeline.innerHTML = items.map(log=>{
         const badge = getModuleBadge(log.module);
-        const time  = formatLogTime(log.timestamp);
-        return `
-          <div style="display:flex;gap:1rem;padding:0.85rem 0;border-bottom:1px solid var(--border);align-items:flex-start">
-            <div style="font-size:1.3rem;margin-top:2px;flex-shrink:0">${badge.icon}</div>
-            <div style="flex:1;min-width:0">
-              <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:3px">
-                <span class="badge ${badge.cls}">${log.module||'SYSTEM'}</span>
-                <span style="font-size:0.875rem;color:var(--text-primary)">${log.action||'—'}</span>
-              </div>
-              <div style="display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap">
-                <span>👤 ${log.userEmail||'system'}</span>
-                <span>🕐 ${time}</span>
-              </div>
+        return `<div style="display:flex;gap:1rem;padding:0.85rem 0;border-bottom:1px solid var(--border);align-items:flex-start">
+          <div style="font-size:1.3rem;flex-shrink:0;margin-top:2px">${badge.icon}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;margin-bottom:3px">
+              <span class="badge ${badge.cls}">${log.module||'SYSTEM'}</span>
+              <span style="font-size:0.875rem;color:var(--text-primary)">${log.action||'—'}</span>
             </div>
-          </div>`;
+            <div style="display:flex;gap:1rem;font-size:0.75rem;color:var(--text-muted);flex-wrap:wrap">
+              <span>👤 ${log.userEmail||'system'}</span>
+              <span>🕐 ${formatLogTime(log.timestamp)}</span>
+            </div>
+          </div>
+        </div>`;
       }).join('');
     }
-
     paginator.renderControls('log-pagination', renderPage);
   }
 
   document.getElementById('log-search').addEventListener('input', applyFilters);
   document.getElementById('log-module-filter').addEventListener('change', applyFilters);
   document.getElementById('btn-refresh').addEventListener('click', loadLogs);
-
-  loadLogs();
 </script>
 </body>
 </html>
