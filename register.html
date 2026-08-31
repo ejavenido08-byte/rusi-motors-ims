@@ -8,10 +8,9 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏍️</text></svg>" />
 </head>
 <body>
-
 <div class="login-page">
 
-  <!-- LEFT BRAND PANEL -->
+  <!-- LEFT BRAND -->
   <div class="login-brand">
     <div class="login-brand-grid"></div>
     <div class="brand-logo-wrap">
@@ -30,26 +29,24 @@
     </div>
   </div>
 
-  <!-- RIGHT FORM PANEL -->
+  <!-- RIGHT FORM -->
   <div class="login-form-panel">
     <div class="login-box">
 
-      <!-- STEP 1: Registration Form -->
+      <!-- ═══ STEP 1: Fill up form ═══ -->
       <div id="step-register">
         <div class="login-box-header">
           <h2>Create Account 🚀</h2>
-          <p>Register as Staff or Manager — OTP will be sent to your email every login</p>
+          <p>Staff or Manager — OTP will be sent to your email on every login</p>
         </div>
 
-        <div class="login-error" id="reg-error">
+        <!-- Error box -->
+        <div class="login-error" id="reg-error" style="display:none">
           ⚠️ <span id="reg-error-msg"></span>
         </div>
 
-        <div class="login-error" id="reg-success" style="background:rgba(46,204,113,0.12);border-color:rgba(46,204,113,0.3);color:#2ecc71;">
-          ✅ <span id="reg-success-msg"></span>
-        </div>
-
         <form id="reg-form" novalidate>
+          <!-- Full Name -->
           <div class="form-group">
             <label class="form-label">Full Name *</label>
             <div class="form-input-wrap">
@@ -58,6 +55,7 @@
             </div>
           </div>
 
+          <!-- Email -->
           <div class="form-group">
             <label class="form-label">Email Address *</label>
             <div class="form-input-wrap">
@@ -66,6 +64,7 @@
             </div>
           </div>
 
+          <!-- Role -->
           <div class="form-group">
             <label class="form-label">Role *</label>
             <div class="form-input-wrap">
@@ -78,24 +77,27 @@
             </div>
           </div>
 
+          <!-- Password -->
           <div class="form-group">
             <label class="form-label">Password *</label>
             <div class="form-input-wrap">
               <input class="form-input" type="password" id="reg-password" placeholder="Minimum 6 characters" />
               <span class="form-input-icon">🔒</span>
-              <button type="button" class="toggle-password" id="reg-toggle-pw">👁️</button>
+              <button type="button" class="toggle-password" id="toggle-pw1" title="Show/hide password">👁️</button>
             </div>
           </div>
 
+          <!-- Confirm Password -->
           <div class="form-group">
             <label class="form-label">Confirm Password *</label>
             <div class="form-input-wrap">
-              <input class="form-input" type="password" id="reg-confirm-pw" placeholder="Re-enter password" />
+              <input class="form-input" type="password" id="reg-confirm" placeholder="Re-enter your password" />
               <span class="form-input-icon">🔒</span>
+              <button type="button" class="toggle-password" id="toggle-pw2" title="Show/hide password">👁️</button>
             </div>
           </div>
 
-          <!-- Password strength bar -->
+          <!-- Password strength -->
           <div style="margin-bottom:1.25rem">
             <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">
               <span>Password strength</span>
@@ -110,52 +112,58 @@
         </form>
 
         <div style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--text-secondary)">
-          Already have an account? <a href="index.html" style="color:var(--primary);font-weight:600">Sign In</a>
+          Already have an account?
+          <a href="index.html" style="color:var(--primary);font-weight:600">Sign In →</a>
         </div>
       </div>
 
-      <!-- STEP 2: OTP Verification after register -->
-      <div id="step-otp-verify" style="display:none">
+      <!-- ═══ STEP 2: Enter OTP ═══ -->
+      <div id="step-otp" style="display:none">
         <div class="login-box-header">
-          <h2>Verify OTP 📧</h2>
-          <p id="otp-verify-desc">Enter the 6-digit code sent to your email</p>
+          <h2>Verify Email 📧</h2>
+          <p id="otp-desc">Enter the 6-digit code sent to your email</p>
         </div>
 
-        <div class="login-error" id="otp-error">
+        <div class="login-error" id="otp-error" style="display:none">
           ⚠️ <span id="otp-error-msg"></span>
         </div>
 
-        <div style="text-align:center;margin:2rem 0">
-          <div style="font-size:3rem;margin-bottom:0.5rem">📧</div>
-          <p style="color:var(--text-secondary);font-size:0.9rem">Check your Gmail inbox for the OTP code</p>
+        <div style="text-align:center;margin:1.5rem 0">
+          <div style="font-size:3rem">📨</div>
+          <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:0.5rem">
+            Code expires in <span id="otp-countdown" style="color:var(--primary);font-weight:700">10:00</span>
+          </p>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Enter OTP Code</label>
+          <label class="form-label">OTP Code</label>
           <input
             class="form-input"
             type="text"
-            id="otp-input-verify"
+            id="otp-code"
             placeholder="123456"
             maxlength="6"
-            style="text-align:center;font-size:1.8rem;font-weight:800;letter-spacing:8px;padding:1rem"
+            inputmode="numeric"
+            style="text-align:center;font-size:2rem;font-weight:800;letter-spacing:10px;padding:1rem"
           />
         </div>
 
-        <button class="btn-login" id="btn-verify-otp">✅ Verify &amp; Complete Registration</button>
+        <button class="btn-login" id="btn-verify">✅ Verify &amp; Create Account</button>
 
-        <div style="text-align:center;margin-top:1rem">
-          <button id="btn-resend-otp" style="background:none;border:none;color:var(--primary);font-size:0.85rem;cursor:pointer">
-            Resend OTP
-          </button>
+        <div style="text-align:center;margin-top:1rem;font-size:0.85rem">
+          <button id="btn-resend" type="button" style="background:none;border:none;color:var(--primary);cursor:pointer">🔁 Resend OTP</button>
+          &nbsp;|&nbsp;
+          <button id="btn-back" type="button" style="background:none;border:none;color:var(--text-secondary);cursor:pointer">← Back</button>
         </div>
       </div>
 
-      <!-- STEP 3: Success -->
+      <!-- ═══ STEP 3: Success ═══ -->
       <div id="step-success" style="display:none;text-align:center;padding:2rem 0">
         <div style="font-size:4rem;margin-bottom:1rem">🎉</div>
         <h2 style="color:var(--success);margin-bottom:0.5rem">Account Created!</h2>
-        <p style="color:var(--text-secondary);margin-bottom:2rem">Your account has been successfully created. You can now sign in.</p>
+        <p style="color:var(--text-secondary);margin-bottom:2rem">
+          Your account has been created successfully.<br/>You can now sign in using your email and password.
+        </p>
         <a href="index.html" class="btn-login" style="display:block;text-align:center">Go to Login →</a>
       </div>
 
@@ -169,154 +177,197 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script type="module">
-  import { registerUser, redirectIfLoggedIn, getBasePath } from './js/auth.js';
-  import { sendOTP, verifyOTP } from './js/otp.js';
-  import { showToast } from './js/app.js';
+  import { registerUser, getBasePath } from './js/auth.js';
+  import { sendOTP, verifyOTP }        from './js/otp.js';
+  import { showToast }                 from './js/app.js';
+  import { auth }                      from './js/firebase-config.js';
+  import { onAuthStateChanged }        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  redirectIfLoggedIn();
-
-  const regForm     = document.getElementById('reg-form');
-  const btnRegister = document.getElementById('btn-register');
-  const regError    = document.getElementById('reg-error');
-  const regErrorMsg = document.getElementById('reg-error-msg');
-  const regSuccess  = document.getElementById('reg-success');
-  const regSuccessMsg = document.getElementById('reg-success-msg');
-
-  // Toggle password visibility
-  document.getElementById('reg-toggle-pw').addEventListener('click', () => {
-    const pw = document.getElementById('reg-password');
-    pw.type = pw.type === 'text' ? 'password' : 'text';
+  // If already logged in, go to dashboard
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.replace(getBasePath() + 'dashboard.html');
   });
 
-  // Password strength checker
+  // ── Eye icon toggle — password ──────────────────────────
+  document.getElementById('toggle-pw1').addEventListener('click', () => {
+    const pw = document.getElementById('reg-password');
+    const btn = document.getElementById('toggle-pw1');
+    pw.type = pw.type === 'text' ? 'password' : 'text';
+    btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
+  });
+
+  // ── Eye icon toggle — confirm password ─────────────────
+  document.getElementById('toggle-pw2').addEventListener('click', () => {
+    const pw = document.getElementById('reg-confirm');
+    const btn = document.getElementById('toggle-pw2');
+    pw.type = pw.type === 'text' ? 'password' : 'text';
+    btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
+  });
+
+  // ── Password strength checker ───────────────────────────
   document.getElementById('reg-password').addEventListener('input', (e) => {
     const val = e.target.value;
     const bar = document.getElementById('pw-strength-bar');
     const lbl = document.getElementById('pw-strength-label');
-    let strength = 0;
-    if (val.length >= 6)  strength++;
-    if (val.length >= 10) strength++;
-    if (/[A-Z]/.test(val)) strength++;
-    if (/[0-9]/.test(val)) strength++;
-    if (/[^A-Za-z0-9]/.test(val)) strength++;
-
-    const levels = [
+    let s = 0;
+    if (val.length >= 6)           s++;
+    if (val.length >= 10)          s++;
+    if (/[A-Z]/.test(val))         s++;
+    if (/[0-9]/.test(val))         s++;
+    if (/[^A-Za-z0-9]/.test(val))  s++;
+    const lvl = [
       { w: '0%',   c: 'var(--danger)',  l: '—' },
       { w: '25%',  c: 'var(--danger)',  l: 'Weak' },
       { w: '50%',  c: 'var(--warning)', l: 'Fair' },
       { w: '75%',  c: 'var(--warning)', l: 'Good' },
       { w: '90%',  c: 'var(--success)', l: 'Strong' },
       { w: '100%', c: 'var(--success)', l: 'Very Strong' }
-    ];
-    const lvl = levels[Math.min(strength, 5)];
+    ][Math.min(s, 5)];
     bar.style.width      = lvl.w;
     bar.style.background = lvl.c;
     lbl.textContent      = lvl.l;
     lbl.style.color      = lvl.c;
   });
 
-  let pendingEmail = '';
-  let pendingName  = '';
-  let pendingRole  = '';
-  let pendingPw    = '';
+  // ── Helper: show error ──────────────────────────────────
+  function showErr(boxId, msgId, msg) {
+    const box = document.getElementById(boxId);
+    box.querySelector ? null : null;
+    document.getElementById(msgId).textContent = msg;
+    box.style.display = 'block';
+    box.classList.add('show');
+  }
+  function hideErr(boxId) {
+    const box = document.getElementById(boxId);
+    box.style.display = 'none';
+    box.classList.remove('show');
+  }
 
-  // ── STEP 1: Register form submit ───────────────────────
-  regForm.addEventListener('submit', async (e) => {
+  let pendingEmail = '', pendingName = '', pendingRole = '', pendingPw = '';
+  let countdownTimer;
+
+  // ── STEP 1: Submit form ─────────────────────────────────
+  document.getElementById('reg-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    regError.classList.remove('show');
-    regSuccess.classList.remove('show');
+    hideErr('reg-error');
 
-    const name     = document.getElementById('reg-name').value.trim();
-    const email    = document.getElementById('reg-email').value.trim();
-    const role     = document.getElementById('reg-role').value;
-    const password = document.getElementById('reg-password').value;
-    const confirm  = document.getElementById('reg-confirm-pw').value;
+    const name    = document.getElementById('reg-name').value.trim();
+    const email   = document.getElementById('reg-email').value.trim();
+    const role    = document.getElementById('reg-role').value;
+    const pw      = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
 
-    if (!name || !email || !role || !password || !confirm) {
-      regErrorMsg.textContent = 'Please fill in all fields.';
-      regError.classList.add('show'); return;
-    }
-    if (password !== confirm) {
-      regErrorMsg.textContent = 'Passwords do not match.';
-      regError.classList.add('show'); return;
-    }
-    if (password.length < 6) {
-      regErrorMsg.textContent = 'Password must be at least 6 characters.';
-      regError.classList.add('show'); return;
-    }
+    // Validations
+    if (!name)              { showErr('reg-error','reg-error-msg','Full name is required.'); return; }
+    if (!email)             { showErr('reg-error','reg-error-msg','Email is required.'); return; }
+    if (!email.includes('@')){ showErr('reg-error','reg-error-msg','Enter a valid email address.'); return; }
+    if (!role)              { showErr('reg-error','reg-error-msg','Please select a role.'); return; }
+    if (!pw)                { showErr('reg-error','reg-error-msg','Password is required.'); return; }
+    if (pw.length < 6)      { showErr('reg-error','reg-error-msg','Password must be at least 6 characters.'); return; }
+    if (pw !== confirm)     { showErr('reg-error','reg-error-msg','Passwords do not match.'); return; }
 
-    btnRegister.disabled  = true;
-    btnRegister.innerHTML = '<span class="spinner"></span> Sending OTP…';
+    const btn = document.getElementById('btn-register');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span> Sending OTP…';
 
     try {
-      // Send OTP first before creating account
       await sendOTP(email, name);
       pendingEmail = email;
       pendingName  = name;
       pendingRole  = role;
-      pendingPw    = password;
+      pendingPw    = pw;
 
-      // Show OTP verification step
-      document.getElementById('step-register').style.display    = 'none';
-      document.getElementById('step-otp-verify').style.display  = 'block';
-      document.getElementById('otp-verify-desc').textContent    =
-        `Enter the 6-digit code sent to ${email}`;
-      showToast('OTP sent! Check your Gmail.', 'success');
+      // Show OTP step
+      document.getElementById('step-register').style.display = 'none';
+      document.getElementById('step-otp').style.display      = 'block';
+      document.getElementById('otp-desc').textContent = `Code sent to ${email}`;
+      startCountdown(600);
+      showToast('OTP sent! Check your Gmail inbox.', 'success');
 
     } catch (err) {
-      regErrorMsg.textContent = 'Failed to send OTP: ' + err.message;
-      regError.classList.add('show');
-      btnRegister.disabled  = false;
-      btnRegister.innerHTML = 'Create Account';
+      showErr('reg-error', 'reg-error-msg', 'Failed to send OTP: ' + err.message);
+      btn.disabled  = false;
+      btn.innerHTML = 'Create Account';
     }
   });
 
-  // ── STEP 2: OTP Verify ─────────────────────────────────
-  document.getElementById('btn-verify-otp').addEventListener('click', async () => {
-    const code    = document.getElementById('otp-input-verify').value.trim();
-    const otpErr  = document.getElementById('otp-error');
-    const otpErrMsg = document.getElementById('otp-error-msg');
-    otpErr.classList.remove('show');
+  // ── STEP 2: Verify OTP ──────────────────────────────────
+  document.getElementById('btn-verify').addEventListener('click', async () => {
+    hideErr('otp-error');
+    const code   = document.getElementById('otp-code').value.trim();
+
+    if (!code || code.length < 6) {
+      showErr('otp-error','otp-error-msg','Enter the 6-digit OTP code.'); return;
+    }
 
     const result = verifyOTP(code, pendingEmail);
     if (!result.valid) {
-      otpErrMsg.textContent = result.reason;
-      otpErr.classList.add('show'); return;
+      showErr('otp-error','otp-error-msg', result.reason); return;
     }
 
-    const btn = document.getElementById('btn-verify-otp');
+    const btn = document.getElementById('btn-verify');
     btn.disabled  = true;
     btn.innerHTML = '<span class="spinner"></span> Creating account…';
 
     try {
       await registerUser(pendingEmail, pendingPw, pendingName, pendingRole);
-      document.getElementById('step-otp-verify').style.display = 'none';
-      document.getElementById('step-success').style.display    = 'block';
+      clearInterval(countdownTimer);
+      document.getElementById('step-otp').style.display     = 'none';
+      document.getElementById('step-success').style.display = 'block';
+      showToast('Account created successfully!', 'success');
+
     } catch (err) {
       let msg = err.message;
-      if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered.';
-      otpErrMsg.textContent = msg;
-      otpErr.classList.add('show');
+      if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered. Please sign in instead.';
+      if (err.code === 'auth/invalid-email')         msg = 'Invalid email address.';
+      showErr('otp-error','otp-error-msg', msg);
       btn.disabled  = false;
-      btn.innerHTML = '✅ Verify & Complete Registration';
+      btn.innerHTML = '✅ Verify & Create Account';
     }
   });
 
-  // ── Resend OTP ─────────────────────────────────────────
-  document.getElementById('btn-resend-otp').addEventListener('click', async () => {
+  // ── Resend OTP ──────────────────────────────────────────
+  document.getElementById('btn-resend').addEventListener('click', async () => {
     if (!pendingEmail) return;
     try {
       await sendOTP(pendingEmail, pendingName);
-      showToast('New OTP sent to ' + pendingEmail, 'success');
+      startCountdown(600);
+      document.getElementById('otp-code').value = '';
+      showToast('New OTP sent!', 'success');
     } catch (err) {
       showToast('Failed to resend: ' + err.message, 'error');
     }
   });
 
-  // Auto-format OTP input — numbers only
-  document.getElementById('otp-input-verify').addEventListener('input', (e) => {
+  // ── Back to form ────────────────────────────────────────
+  document.getElementById('btn-back').addEventListener('click', () => {
+    clearInterval(countdownTimer);
+    document.getElementById('step-otp').style.display      = 'none';
+    document.getElementById('step-register').style.display = 'block';
+    document.getElementById('btn-register').disabled  = false;
+    document.getElementById('btn-register').innerHTML = 'Create Account';
+  });
+
+  // ── OTP: numbers only ───────────────────────────────────
+  document.getElementById('otp-code').addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g, '').substring(0, 6);
   });
+
+  // ── Countdown timer ─────────────────────────────────────
+  function startCountdown(seconds) {
+    clearInterval(countdownTimer);
+    let remaining = seconds;
+    const el = document.getElementById('otp-countdown');
+    const tick = () => {
+      const m = Math.floor(remaining / 60).toString().padStart(2,'0');
+      const s = (remaining % 60).toString().padStart(2,'0');
+      if (el) { el.textContent = `${m}:${s}`; el.style.color = remaining <= 60 ? 'var(--danger)' : 'var(--primary)'; }
+      if (remaining <= 0) { clearInterval(countdownTimer); if (el) el.textContent = 'Expired ❌'; }
+      remaining--;
+    };
+    tick();
+    countdownTimer = setInterval(tick, 1000);
+  }
 </script>
 </body>
 </html>
