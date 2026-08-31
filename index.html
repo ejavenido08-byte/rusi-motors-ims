@@ -147,10 +147,12 @@
   let currentName  = '';
   let countdownTimer;
 
-  // Toggle password
+  // Toggle password — eye icon swap
   document.getElementById('toggle-pw').addEventListener('click', () => {
-    const pw = document.getElementById('password');
+    const pw  = document.getElementById('password');
+    const btn = document.getElementById('toggle-pw');
     pw.type = pw.type === 'text' ? 'password' : 'text';
+    btn.textContent = pw.type === 'text' ? '🙈' : '👁️';
   });
 
   // Numbers only for OTP input
@@ -181,16 +183,21 @@
       currentEmail = email;
       currentName  = user.displayName || email.split('@')[0];
 
-      // Send OTP
+      // Admin goes straight to dashboard — no OTP needed
+      const role = sessionStorage.getItem('rusi_role') || 'Admin';
+      if (role === 'Admin') {
+        window.location.replace(getBasePath() + 'dashboard.html');
+        return;
+      }
+
+      // Staff and Manager get OTP
       btn.innerHTML = '<span class="spinner"></span> Sending OTP…';
       await sendOTP(email, currentName);
 
-      // Show OTP step
       document.getElementById('step-login').style.display = 'none';
       document.getElementById('step-otp').style.display   = 'block';
       document.getElementById('otp-sent-desc').textContent =
         `We sent a 6-digit code to ${email}`;
-
       startCountdown(600);
       showToast('OTP sent! Check your Gmail.', 'success');
 
