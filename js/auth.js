@@ -6,10 +6,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { logActivity } from './logs.js';
 
+function getBasePath() {
+  const path = window.location.pathname;
+  return path.substring(0, path.lastIndexOf('/') + 1);
+}
+
 export function requireAuth() {
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = 'index.html';
+      window.location.replace(getBasePath() + 'index.html');
     }
   });
 }
@@ -17,7 +22,7 @@ export function requireAuth() {
 export function redirectIfLoggedIn() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      window.location.href = 'dashboard.html';
+      window.location.replace(getBasePath() + 'dashboard.html');
     }
   });
 }
@@ -33,8 +38,8 @@ export async function logoutUser() {
   if (user) {
     logActivity('AUTH', `User logged out: ${user.email}`, user.uid).catch(() => {});
   }
-  await signOut(auth);
-  window.location.href = 'index.html';
+  try { await signOut(auth); } catch (e) {}
+  window.location.replace(getBasePath() + 'index.html');
 }
 
 export function getCurrentUser() {
