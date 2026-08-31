@@ -5,244 +5,145 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventory – RUSI Motors IMS</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>" />
 </head>
 <body>
-
 <div id="toast-container" class="toast-container"></div>
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-<!-- ══════════════ SIDEBAR ══════════════ -->
 <aside class="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">🏍️</div>
-    <div class="sidebar-brand">
-      <span class="sidebar-brand-name">RUSI</span>
-      <span class="sidebar-brand-sub">Motors IMS</span>
-    </div>
+    <div class="sidebar-brand"><span class="sidebar-brand-name">RUSI</span><span class="sidebar-brand-sub">Motors IMS</span></div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
-    <a href="dashboard.html"  class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
-    <a href="inventory.html"  class="nav-item active"><span class="nav-icon">📦</span> Inventory</a>
-    <a href="sales.html"      class="nav-item"><span class="nav-icon">💰</span> Sales</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="inventory.html" class="nav-item active"><span class="nav-icon">📦</span> Inventory</a>
+    <a href="sales.html"     class="nav-item"><span class="nav-icon">💰</span> Sales</a>
     <div class="nav-section-label">Management</div>
-    <a href="suppliers.html"  class="nav-item"><span class="nav-icon">🏭</span> Suppliers</a>
-    <a href="users.html"      class="nav-item"><span class="nav-icon">👥</span> Users</a>
-    <a href="lowstock.html"   class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
-    <div class="nav-section-label">Analytics</div>
-    <a href="reports.html"    class="nav-item"><span class="nav-icon">📈</span> Reports</a>
-    <a href="logs.html"       class="nav-item"><span class="nav-icon">📋</span> Activity Logs</a>
+    <a href="suppliers.html" class="nav-item" data-min-role="Manager"><span class="nav-icon">🏭</span> Suppliers</a>
+    <a href="users.html"     class="nav-item" data-role="Admin"><span class="nav-icon">👥</span> Users</a>
+    <a href="lowstock.html"  class="nav-item"><span class="nav-icon">⚠️</span> Low Stock</a>
+    <div class="nav-section-label" data-min-role="Manager">Analytics</div>
+    <a href="reports.html"   class="nav-item" data-min-role="Manager"><span class="nav-icon">📈</span> Reports</a>
+    <a href="logs.html"      class="nav-item" data-role="Admin"><span class="nav-icon">📋</span> Activity Logs</a>
   </nav>
   <div class="sidebar-user">
     <div class="user-avatar" id="sidebar-user-avatar">AD</div>
-    <div class="user-info">
-      <div class="user-name" id="sidebar-user-name">Admin</div>
-      <div class="user-role" id="sidebar-user-role">Administrator</div>
-    </div>
+    <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading…</div><div class="user-role" id="sidebar-user-role">—</div></div>
     <button class="btn-logout" id="btn-logout" title="Logout">🚪</button>
   </div>
 </aside>
 
-<!-- ══════════════ MAIN ══════════════ -->
 <div class="main-content">
   <header class="top-header">
     <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
-    <div class="header-title">
-      <h1>Inventory Management</h1>
-      <p>Feature 1 — Manage motorcycle units and parts stock</p>
-    </div>
-    <div class="header-actions">
-      <div class="header-time" id="live-clock"></div>
-    </div>
+    <div class="header-title"><h1>Inventory Management</h1><p>Feature 1 — Motorcycle units and parts stock</p></div>
+    <div class="header-actions"><div class="header-time" id="live-clock"></div></div>
   </header>
 
   <div class="page-body">
-
-    <!-- Stats -->
-    <div class="stats-grid mb-3" id="inv-stats">
-      <div class="stat-card" style="--stat-color:#e63946">
-        <div class="stat-icon-wrap">📦</div>
-        <div class="stat-info">
-          <div class="stat-val" id="inv-total">—</div>
-          <div class="stat-label">Total SKUs</div>
-        </div>
-      </div>
-      <div class="stat-card" style="--stat-color:#2ecc71">
-        <div class="stat-icon-wrap">✅</div>
-        <div class="stat-info">
-          <div class="stat-val" id="inv-instock">—</div>
-          <div class="stat-label">In Stock</div>
-        </div>
-      </div>
-      <div class="stat-card" style="--stat-color:#f39c12">
-        <div class="stat-icon-wrap">⚠️</div>
-        <div class="stat-info">
-          <div class="stat-val" id="inv-low">—</div>
-          <div class="stat-label">Low Stock</div>
-        </div>
-      </div>
-      <div class="stat-card" style="--stat-color:#e74c3c">
-        <div class="stat-icon-wrap">❌</div>
-        <div class="stat-info">
-          <div class="stat-val" id="inv-out">—</div>
-          <div class="stat-label">Out of Stock</div>
-        </div>
-      </div>
+    <!-- Role notice for Staff -->
+    <div class="alert alert-info mb-2" id="staff-notice" style="display:none">
+      👁️ <strong>View Only Mode</strong> — Staff can view inventory but cannot add, edit, or delete items.
     </div>
 
-    <!-- Table card -->
+    <div class="stats-grid mb-3">
+      <div class="stat-card" style="--stat-color:#e63946"><div class="stat-icon-wrap">📦</div><div class="stat-info"><div class="stat-val" id="inv-total">—</div><div class="stat-label">Total SKUs</div></div></div>
+      <div class="stat-card" style="--stat-color:#2ecc71"><div class="stat-icon-wrap">✅</div><div class="stat-info"><div class="stat-val" id="inv-instock">—</div><div class="stat-label">In Stock</div></div></div>
+      <div class="stat-card" style="--stat-color:#f39c12"><div class="stat-icon-wrap">⚠️</div><div class="stat-info"><div class="stat-val" id="inv-low">—</div><div class="stat-label">Low Stock</div></div></div>
+      <div class="stat-card" style="--stat-color:#e74c3c"><div class="stat-icon-wrap">❌</div><div class="stat-info"><div class="stat-val" id="inv-out">—</div><div class="stat-label">Out of Stock</div></div></div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <span class="card-title"><span class="card-title-icon">📦</span> Stock List</span>
         <div class="flex gap-1 flex-wrap">
-          <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="inv-search" placeholder="Search items…" />
-          </div>
+          <div class="search-bar"><span class="search-icon">🔍</span><input type="text" id="inv-search" placeholder="Search items…" /></div>
           <select class="select-field" id="inv-cat-filter" style="width:auto">
             <option value="">All Categories</option>
-            <option>Motorcycles</option>
-            <option>Spare Parts</option>
-            <option>Accessories</option>
-            <option>E-Bikes</option>
+            <option>Motorcycles</option><option>Spare Parts</option><option>Accessories</option><option>E-Bikes</option>
           </select>
           <button class="btn btn-secondary btn-sm" onclick="exportTableCSV('inv-table','inventory.csv')">⬇️ Export</button>
-          <button class="btn btn-primary btn-sm" id="btn-add-inv">+ Add Item</button>
+          <!-- Add button: hidden for Staff -->
+          <button class="btn btn-primary btn-sm" id="btn-add-inv" data-min-role="Manager">+ Add Item</button>
         </div>
       </div>
       <div class="table-wrap">
         <table class="data-table" id="inv-table">
           <thead>
-            <tr>
-              <th>#</th>
-              <th>Item Name</th>
-              <th>Category</th>
-              <th>SKU / Model</th>
-              <th>Quantity</th>
-              <th>Min Stock</th>
-              <th>Unit Price</th>
-              <th>Supplier</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
+            <tr><th>#</th><th>Item Name</th><th>Category</th><th>SKU</th><th>Quantity</th><th>Min Stock</th><th>Unit Price</th><th>Supplier</th><th>Status</th>
+            <!-- Actions column hidden for Staff -->
+            <th data-min-role="Manager">Actions</th></tr>
           </thead>
-          <tbody id="inv-tbody">
-            <tr><td colspan="10" style="text-align:center;padding:2rem" class="text-muted">Loading inventory…</td></tr>
-          </tbody>
+          <tbody id="inv-tbody"><tr><td colspan="10" style="text-align:center;padding:2rem" class="text-muted">Loading…</td></tr></tbody>
         </table>
       </div>
-      <div style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)" id="inv-pagination"></div>
+      <div id="inv-pagination" style="padding:1rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border)"></div>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════ ADD / EDIT MODAL ══════════ -->
+<!-- MODAL — Manager/Admin only -->
 <div class="modal-overlay" id="inv-modal">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="inv-modal-title">Add New Item</h3>
-      <button class="modal-close" id="inv-modal-close">✕</button>
-    </div>
+    <div class="modal-header"><h3 id="inv-modal-title">Add New Item</h3><button class="modal-close" id="inv-modal-close">✕</button></div>
     <div class="modal-body">
       <input type="hidden" id="inv-edit-id" />
       <div class="form-grid">
-        <div class="input-group" style="grid-column:1/-1">
-          <label class="input-label">Item Name *</label>
-          <input class="input-field" id="inv-name" placeholder="e.g. RUSI GS50 125cc" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Category *</label>
-          <select class="select-field" id="inv-category">
-            <option>Motorcycles</option>
-            <option>Spare Parts</option>
-            <option>Accessories</option>
-            <option>E-Bikes</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label class="input-label">SKU / Model Code</label>
-          <input class="input-field" id="inv-sku" placeholder="e.g. GS50-125-BLK" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Quantity *</label>
-          <input class="input-field" type="number" id="inv-qty" min="0" placeholder="0" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Minimum Stock Level</label>
-          <input class="input-field" type="number" id="inv-minstock" min="0" placeholder="5" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Unit Price (₱)</label>
-          <input class="input-field" type="number" id="inv-price" min="0" step="0.01" placeholder="0.00" />
-        </div>
-        <div class="input-group">
-          <label class="input-label">Supplier</label>
-          <input class="input-field" id="inv-supplier" placeholder="Supplier name" />
-        </div>
-        <div class="input-group" style="grid-column:1/-1">
-          <label class="input-label">Description</label>
-          <textarea class="textarea-field" id="inv-desc" placeholder="Optional description…"></textarea>
-        </div>
+        <div class="input-group" style="grid-column:1/-1"><label class="input-label">Item Name *</label><input class="input-field" id="inv-name" placeholder="e.g. RUSI GS50 125cc" /></div>
+        <div class="input-group"><label class="input-label">Category *</label><select class="select-field" id="inv-category"><option>Motorcycles</option><option>Spare Parts</option><option>Accessories</option><option>E-Bikes</option></select></div>
+        <div class="input-group"><label class="input-label">SKU / Model</label><input class="input-field" id="inv-sku" placeholder="GS50-125-BLK" /></div>
+        <div class="input-group"><label class="input-label">Quantity *</label><input class="input-field" type="number" id="inv-qty" min="0" placeholder="0" /></div>
+        <div class="input-group"><label class="input-label">Min Stock Level</label><input class="input-field" type="number" id="inv-minstock" min="0" placeholder="5" /></div>
+        <div class="input-group"><label class="input-label">Unit Price (₱)</label><input class="input-field" type="number" id="inv-price" min="0" step="0.01" placeholder="0.00" /></div>
+        <div class="input-group"><label class="input-label">Supplier</label><input class="input-field" id="inv-supplier" placeholder="Supplier name" /></div>
+        <div class="input-group" style="grid-column:1/-1"><label class="input-label">Description</label><textarea class="textarea-field" id="inv-desc"></textarea></div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" id="inv-modal-cancel">Cancel</button>
-      <button class="btn btn-primary" id="inv-modal-save">💾 Save Item</button>
+      <button class="btn btn-primary" id="inv-modal-save">💾 Save</button>
     </div>
   </div>
 </div>
 
 <script type="module">
-  import { requireAuth, logoutUser, populateSidebarUser } from './js/auth.js';
+  import { requireAuth, logoutUser, populateSidebarUser, getCachedRole } from './js/auth.js';
   import { startClock, showToast, initSidebarToggle, exportTableCSV, Paginator } from './js/app.js';
   import { logActivity } from './js/logs.js';
   import { db } from './js/firebase-config.js';
-  import {
-    collection, getDocs, addDoc, updateDoc, deleteDoc,
-    doc, orderBy, query, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  requireAuth();
-  populateSidebarUser();
-  startClock();
-  initSidebarToggle();
+  requireAuth(); populateSidebarUser(); startClock(); initSidebarToggle();
   document.getElementById('btn-logout').addEventListener('click', () => logoutUser());
   window.exportTableCSV = exportTableCSV;
 
-  let allItems = [];
-  let paginator;
+  let allItems = [], paginator, userRole = 'Staff';
 
-  // ── Load inventory ──────────────────────────────────────
+  // Wait a moment for role to be cached then render
+  setTimeout(() => {
+    userRole = getCachedRole();
+    if (userRole === 'Staff') {
+      document.getElementById('staff-notice').style.display = 'flex';
+    }
+    loadInventory();
+  }, 800);
+
   async function loadInventory() {
     const snap = await getDocs(query(collection(db, 'inventory'), orderBy('name')));
     allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     applyFilters();
-    updateStats();
-  }
-
-  function updateStats() {
-    const total   = allItems.length;
-    const inStock = allItems.filter(i => Number(i.quantity) > Number(i.minStock || 5)).length;
-    const low     = allItems.filter(i => Number(i.quantity) > 0 && Number(i.quantity) <= Number(i.minStock || 5)).length;
-    const out     = allItems.filter(i => Number(i.quantity) === 0).length;
-    document.getElementById('inv-total').textContent   = total;
-    document.getElementById('inv-instock').textContent = inStock;
-    document.getElementById('inv-low').textContent     = low;
-    document.getElementById('inv-out').textContent     = out;
+    document.getElementById('inv-total').textContent   = allItems.length;
+    document.getElementById('inv-instock').textContent = allItems.filter(i => Number(i.quantity) > Number(i.minStock||5)).length;
+    document.getElementById('inv-low').textContent     = allItems.filter(i => Number(i.quantity) > 0 && Number(i.quantity) <= Number(i.minStock||5)).length;
+    document.getElementById('inv-out').textContent     = allItems.filter(i => Number(i.quantity) === 0).length;
   }
 
   function applyFilters() {
     const search = document.getElementById('inv-search').value.toLowerCase();
     const cat    = document.getElementById('inv-cat-filter').value;
-    let filtered = allItems.filter(i => {
-      const matchSearch = !search ||
-        (i.name || '').toLowerCase().includes(search) ||
-        (i.sku  || '').toLowerCase().includes(search);
-      const matchCat = !cat || i.category === cat;
-      return matchSearch && matchCat;
-    });
+    const filtered = allItems.filter(i => (!search || (i.name||'').toLowerCase().includes(search) || (i.sku||'').toLowerCase().includes(search)) && (!cat || i.category === cat));
     paginator = new Paginator(filtered, 15);
     renderPage(1);
   }
@@ -250,125 +151,74 @@
   function renderPage(n) {
     const items = paginator.getPage(n);
     const tbody = document.getElementById('inv-tbody');
-
-    if (items.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:2rem" class="text-muted">No items found</td></tr>';
-    } else {
-      tbody.innerHTML = items.map((item, idx) => {
-        const qty     = Number(item.quantity || 0);
-        const minStk  = Number(item.minStock  || 5);
-        const status  = qty === 0 ? 'Out of Stock' : qty <= minStk ? 'Low Stock' : 'In Stock';
-        const badgeCls= qty === 0 ? 'badge-danger' : qty <= minStk ? 'badge-warning' : 'badge-success';
-        const price   = Number(item.price || 0).toLocaleString('en-PH', { minimumFractionDigits: 2 });
-        return `<tr>
-          <td class="text-muted">${(paginator.current - 1) * 15 + idx + 1}</td>
-          <td class="fw-600">${item.name || '—'}</td>
-          <td><span class="badge badge-muted">${item.category || '—'}</span></td>
-          <td class="text-secondary">${item.sku || '—'}</td>
-          <td class="fw-700 ${qty === 0 ? 'text-danger' : qty <= minStk ? 'text-warning' : 'text-success'}">${qty}</td>
-          <td class="text-muted">${minStk}</td>
-          <td>₱${price}</td>
-          <td class="text-secondary">${item.supplier || '—'}</td>
-          <td><span class="badge ${badgeCls}">${status}</span></td>
-          <td>
-            <button class="btn btn-secondary btn-sm" onclick="editItem('${item.id}')">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}','${(item.name||'').replace(/'/g,"\\'")}')">🗑️</button>
-          </td>
-        </tr>`;
-      }).join('');
-    }
-
+    const canEdit = userRole !== 'Staff';
+    tbody.innerHTML = items.length ? items.map((item, idx) => {
+      const qty = Number(item.quantity||0), min = Number(item.minStock||5);
+      const status = qty === 0 ? 'Out of Stock' : qty <= min ? 'Low Stock' : 'In Stock';
+      const bc     = qty === 0 ? 'badge-danger' : qty <= min ? 'badge-warning' : 'badge-success';
+      const price  = Number(item.price||0).toLocaleString('en-PH',{minimumFractionDigits:2});
+      return `<tr>
+        <td class="text-muted">${(paginator.current-1)*15+idx+1}</td>
+        <td class="fw-600">${item.name||'—'}</td>
+        <td><span class="badge badge-muted">${item.category||'—'}</span></td>
+        <td class="text-secondary">${item.sku||'—'}</td>
+        <td class="fw-700 ${qty===0?'text-danger':qty<=min?'text-warning':'text-success'}">${qty}</td>
+        <td class="text-muted">${min}</td>
+        <td>₱${price}</td>
+        <td class="text-secondary">${item.supplier||'—'}</td>
+        <td><span class="badge ${bc}">${status}</span></td>
+        <td>${canEdit ? `<button class="btn btn-secondary btn-sm" onclick="editItem('${item.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteItem('${item.id}','${(item.name||'').replace(/'/g,"\\'")}')">🗑️</button>` : '—'}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="10" style="text-align:center;padding:2rem" class="text-muted">No items found</td></tr>';
     paginator.renderControls('inv-pagination', renderPage);
   }
 
-  // ── Modal helpers ────────────────────────────────────────
   const modal = document.getElementById('inv-modal');
-  function openModal()  { modal.classList.add('show'); }
-  function closeModal() { modal.classList.remove('show'); resetForm(); }
+  const openModal  = () => modal.classList.add('show');
+  const closeModal = () => { modal.classList.remove('show'); ['inv-edit-id','inv-name','inv-sku','inv-qty','inv-minstock','inv-price','inv-supplier','inv-desc'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; }); };
 
-  function resetForm() {
-    ['inv-edit-id','inv-name','inv-sku','inv-qty','inv-minstock','inv-price','inv-supplier','inv-desc']
-      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-    document.getElementById('inv-modal-title').textContent = 'Add New Item';
-  }
-
-  document.getElementById('btn-add-inv').addEventListener('click', openModal);
+  const addBtn = document.getElementById('btn-add-inv');
+  if (addBtn) addBtn.addEventListener('click', openModal);
   document.getElementById('inv-modal-close').addEventListener('click', closeModal);
   document.getElementById('inv-modal-cancel').addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
-  // ── Save (add or edit) ──────────────────────────────────
   document.getElementById('inv-modal-save').addEventListener('click', async () => {
     const name = document.getElementById('inv-name').value.trim();
     const qty  = document.getElementById('inv-qty').value;
-    if (!name || qty === '') { showToast('Item name and quantity are required.', 'warning'); return; }
-
+    if (!name || qty === '') { showToast('Name and quantity required.', 'warning'); return; }
     const editId = document.getElementById('inv-edit-id').value;
-    const data   = {
-      name,
-      category:  document.getElementById('inv-category').value,
-      sku:       document.getElementById('inv-sku').value.trim(),
-      quantity:  Number(qty),
-      minStock:  Number(document.getElementById('inv-minstock').value || 5),
-      price:     Number(document.getElementById('inv-price').value || 0),
-      supplier:  document.getElementById('inv-supplier').value.trim(),
-      description: document.getElementById('inv-desc').value.trim(),
-      updatedAt: serverTimestamp()
-    };
-
+    const data = { name, category: document.getElementById('inv-category').value, sku: document.getElementById('inv-sku').value.trim(), quantity: Number(qty), minStock: Number(document.getElementById('inv-minstock').value||5), price: Number(document.getElementById('inv-price').value||0), supplier: document.getElementById('inv-supplier').value.trim(), description: document.getElementById('inv-desc').value.trim(), updatedAt: serverTimestamp() };
     try {
-      if (editId) {
-        await updateDoc(doc(db, 'inventory', editId), data);
-        await logActivity('INVENTORY', `Updated item: ${name}`);
-        showToast('Item updated successfully.', 'success');
-      } else {
-        data.createdAt = serverTimestamp();
-        await addDoc(collection(db, 'inventory'), data);
-        await logActivity('INVENTORY', `Added new item: ${name}`);
-        showToast('Item added successfully.', 'success');
-      }
-      closeModal();
-      loadInventory();
-    } catch (err) {
-      showToast('Error saving item: ' + err.message, 'error');
-    }
+      if (editId) { await updateDoc(doc(db,'inventory',editId), data); await logActivity('INVENTORY',`Updated: ${name}`); showToast('Updated.','success'); }
+      else { data.createdAt = serverTimestamp(); await addDoc(collection(db,'inventory'), data); await logActivity('INVENTORY',`Added: ${name}`); showToast('Added.','success'); }
+      closeModal(); loadInventory();
+    } catch (err) { showToast('Error: '+err.message,'error'); }
   });
 
-  // ── Edit ────────────────────────────────────────────────
   window.editItem = function(id) {
-    const item = allItems.find(i => i.id === id);
-    if (!item) return;
-    document.getElementById('inv-edit-id').value    = id;
-    document.getElementById('inv-name').value       = item.name       || '';
-    document.getElementById('inv-category').value   = item.category   || 'Motorcycles';
-    document.getElementById('inv-sku').value        = item.sku        || '';
-    document.getElementById('inv-qty').value        = item.quantity   ?? '';
-    document.getElementById('inv-minstock').value   = item.minStock   || 5;
-    document.getElementById('inv-price').value      = item.price      || 0;
-    document.getElementById('inv-supplier').value   = item.supplier   || '';
-    document.getElementById('inv-desc').value       = item.description|| '';
+    const item = allItems.find(i => i.id===id); if (!item) return;
+    document.getElementById('inv-edit-id').value  = id;
+    document.getElementById('inv-name').value     = item.name||'';
+    document.getElementById('inv-category').value = item.category||'Motorcycles';
+    document.getElementById('inv-sku').value      = item.sku||'';
+    document.getElementById('inv-qty').value      = item.quantity??'';
+    document.getElementById('inv-minstock').value = item.minStock||5;
+    document.getElementById('inv-price').value    = item.price||0;
+    document.getElementById('inv-supplier').value = item.supplier||'';
+    document.getElementById('inv-desc').value     = item.description||'';
     document.getElementById('inv-modal-title').textContent = 'Edit Item';
     openModal();
   };
 
-  // ── Delete ──────────────────────────────────────────────
   window.deleteItem = async function(id, name) {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    try {
-      await deleteDoc(doc(db, 'inventory', id));
-      await logActivity('INVENTORY', `Deleted item: ${name}`);
-      showToast('Item deleted.', 'success');
-      loadInventory();
-    } catch (err) {
-      showToast('Delete failed: ' + err.message, 'error');
-    }
+    if (!confirm(`Delete "${name}"?`)) return;
+    try { await deleteDoc(doc(db,'inventory',id)); await logActivity('INVENTORY',`Deleted: ${name}`); showToast('Deleted.','success'); loadInventory(); }
+    catch (err) { showToast('Error: '+err.message,'error'); }
   };
 
-  // ── Filters ─────────────────────────────────────────────
   document.getElementById('inv-search').addEventListener('input', applyFilters);
   document.getElementById('inv-cat-filter').addEventListener('change', applyFilters);
-
-  loadInventory();
 </script>
 </body>
 </html>
