@@ -34,6 +34,8 @@ export function getCachedRole() {
 }
 
 export function requireAuth() {
+  // Show nothing until auth state is confirmed
+  document.body.style.visibility = 'hidden';
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.replace(getBasePath() + 'index.html');
@@ -42,6 +44,8 @@ export function requireAuth() {
         await cacheUserRole(user.uid);
       }
       applyRoleUI(sessionStorage.getItem('rusi_role') || 'Admin');
+      // Show page only after auth confirmed
+      document.body.style.visibility = 'visible';
     }
   });
 }
